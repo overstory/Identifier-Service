@@ -2,23 +2,24 @@ xquery version "1.0-ml";
 
 module namespace lib="urn:overstory:modules:data-mesh:handlers:lib:identifier";
 
+import module namespace const="urn:overstory:modules:data-mesh:handlers:lib:constants" at "constants.xqy";
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 
 declare namespace e = "http://overstory.co.uk/ns/errors";
-declare namespace i = "http://ns.iop.org/namespaces/resources/meta/id";
-declare namespace m = "http://ns.iop.org/namespaces/resources/meta/content";
+declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
+declare namespace m = "http://ns.overstory.co.uk/namespaces/resources/meta/content";
 
 declare namespace s ="http://www.w3.org/2005/xpath-functions";
 
 declare variable $MAX-RETRIES := 20;
 
-declare variable $uri-prefix as xs:string := "urn:iop.org:id:";
+declare variable $uri-prefix as xs:string := "urn:overstory.co.uk:id:";
 declare variable $content-directory-prefix := "/data/mesh/";
 declare variable $identifier-directory-prefix := "/identifier/";
 
 declare variable $default-content-type as xs:string := "application/xml";
 
-declare variable $collection-identifier as xs:string := "urn:overstory.co.uk:collection:identifier";
+declare variable $collection-identifier as xs:string := $const:ID-COLLECTION-NAME;
 
 (: ------------------------------------------------------ :)
 
@@ -86,10 +87,10 @@ declare private function new-identifier-info (
 	$annotation as element(i:annotation)?
 ) as element(i:identifier-info)
 {
-	<i:identifier-info xmlns:i="http://ns.iop.org/namespaces/resources/meta/id">
+	<i:identifier-info>
 		<i:system>
 			<i:uri>{ $uri }</i:uri>
-			<i:etag>{ generate-etag() }</i:etag>
+			<i:etag>"{ generate-etag() }"</i:etag>
 			<i:created>{ current-dateTime-as-utc() }</i:created>
 		</i:system>
 		{ $annotation }
@@ -121,7 +122,7 @@ declare function full-identifier-ml-uri (
 $identifier as xs:string
 ) as xs:string
 {
-    fn:concat ($identifier-directory-prefix, $identifier)
+    fn:concat ($identifier-directory-prefix, $identifier, ".xml")
 };
 
 

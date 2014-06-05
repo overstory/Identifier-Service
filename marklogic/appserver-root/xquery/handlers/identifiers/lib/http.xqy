@@ -6,7 +6,7 @@ import module namespace const="urn:overstory:modules:data-mesh:handlers:lib:cons
 import module namespace re="urn:overstory:rest:modules:rest:errors" at "../../../rest/lib-rest/errors.xqy";
 
 declare namespace e = "http://overstory.co.uk/ns/errors";
-declare namespace i = "http://ns.iop.org/namespaces/resources/meta/id";
+declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
 
 
 

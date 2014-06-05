@@ -4,5 +4,5 @@ import module namespace lib="urn:overstory:modules:data-mesh:handlers:lib:identi
 import module namespace http="urn:overstory:modules:data-mesh:handlers:lib:http" at "lib/http.xqy";
 import module namespace anno="urn:overstory:modules:data-mesh:handlers:lib:annotation" at "lib/annotation.xqy";
 
-declare namespace i = "http://ns.iop.org/namespaces/resources/meta/id";
+declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
 declare namespace e = "http://overstory.co.uk/ns/errors";
