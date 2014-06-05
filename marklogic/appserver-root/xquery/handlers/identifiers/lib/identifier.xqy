@@ -1,0 +1,391 @@
+xquery version "1.0-ml";
+
+module namespace lib="urn:overstory:modules:data-mesh:handlers:lib:identifier";
+
+import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
+
+declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace i = "http://ns.iop.org/namespaces/resources/meta/id";
+declare namespace m = "http://ns.iop.org/namespaces/resources/meta/content";
+
+declare namespace s ="http://www.w3.org/2005/xpath-functions";
+
+declare variable $MAX-RETRIES := 20;
+
+declare variable $uri-prefix as xs:string := "urn:iop.org:id:";
+declare variable $content-directory-prefix := "/data/mesh/";
+declare variable $identifier-directory-prefix := "/identifier/";
+
+declare variable $default-content-type as xs:string := "application/xml";
+
+declare variable $collection-identifier as xs:string := "urn:overstory.co.uk:collection:identifier";
+
+(: ------------------------------------------------------ :)
+
+(:
+	Allocates a unique URI for the template, creates a new i:identifier-info and stores it in the DB
+	Returns the new i:identifier-info on success, empty sequence if it couldn't be created.
+	ToDo: Need a reliable locking strategy to insure IDs are created and checked atomically
+:)
+declare function new-identifier (
+	$template as xs:string,
+	$annotation as element(i:annotation)?
+) as element(i:identifier-info)?
+{
+	let $new-uri := generate-unique-id ($template, 0, $MAX-RETRIES)
+	return
+	if (fn:exists ($new-uri))
+	then store-new-identifier ($new-uri, $annotation)
+	else ()
+};
+
+(:
+	Generates a unique URI, recursing up to $max times if the generated URI is already allocated
+	Return a string on success, empty sequence on failure.
+:)
+declare function generate-unique-id (
+	$template as xs:string,
+	$level as xs:int,
+	$max as xs:int
+) as xs:string?
+{
+	if ($level ge $max)
+	then ()
+	else
+		let $uri := identifier-from-template ($template, $level)
+		return
+		if (identifier-exists ($uri))
+		then generate-unique-id ($template, $level + 1, $max)
+		else $uri
+};
+
+(: ------------------------------------------------------ :)
+
+declare function validate-annotation (
+	$post-body as document-node()?
+) as element(i:annotation)?
+{
+	if (fn:empty ($post-body))
+	then ()
+	else $post-body/i:annotation	(: Will cause exception if body is not an i:annotation element because of function's declared return type :)
+};
+
+
+(: ------------------------------------------------------ :)
+
+declare private function store-new-identifier (
+	$uri as xs:string,
+	$annotation as element(i:annotation)?
+) as element(i:identifier-info)
+{
+	store-identifier-doc (new-identifier-info ($uri, $annotation))
+};
+
+declare private function new-identifier-info (
+	$uri as xs:string,
+	$annotation as element(i:annotation)?
+) as element(i:identifier-info)
+{
+	<i:identifier-info xmlns:i="http://ns.iop.org/namespaces/resources/meta/id">
+		<i:system>
+			<i:uri>{ $uri }</i:uri>
+			<i:etag>{ generate-etag() }</i:etag>
+			<i:created>{ current-dateTime-as-utc() }</i:created>
+		</i:system>
+		{ $annotation }
+	</i:identifier-info>
+};
+
+(: ------------------------------------------------------ :)
+
+(: Identifier functionality specific :)
+
+(: default uri when /identifier is called without any parameters :)
+declare function generate-default-uri (
+) as xs:string
+{
+    fn:concat ($uri-prefix, "resource:", generate-uuid-v4())
+};
+
+(: check if identifier-uri exists :)
+declare function identifier-exists (
+	$identifier as xs:string
+) as xs:boolean
+{
+	(: ToDo: check existence of the id inside an identifier-info doc (in proper collection), don't use doc URI as proof of existence existence :)
+	fn:exists (fn:doc (full-identifier-ml-uri ($identifier) ))
+};
+
+(: add directory path to identifier-uri :)
+declare function full-identifier-ml-uri (
+$identifier as xs:string
+) as xs:string
+{
+    fn:concat ($identifier-directory-prefix, $identifier)
+};
+
+
+(: insert identifier document :)
+declare function store-identifier-doc (
+	$doc as element(i:identifier-info)
+) as element(i:identifier-info)
+{
+	(
+		xdmp:document-insert (full-identifier-ml-uri ($doc/i:system/i:uri),
+			$doc, xdmp:default-permissions(), collections-for-new-identifier()),
+		$doc
+	)
+};
+
+(: return collections for identifier :)
+declare function collections-for-new-identifier (
+) as xs:string*
+{
+	($collection-identifier)
+};
+
+(: get identifier document :)
+declare function get-identifier-info (
+    $identifier as xs:string
+) as element(i:identifier-info)?
+{
+	(: ToDo: Look up by internal ID, not algorithmically created doc URL :)
+	fn:doc (full-identifier-ml-uri ($identifier))/i:identifier-info
+};
+
+
+(: ToDo: Move this template stuff to template.xqy, make inside functions private :)
+
+(: identifier template work :)
+
+declare function identifier-from-template (
+    $template as xs:string,
+    $level as xs:int
+) as xs:string
+{
+    let $analyze := fn:analyze-string ($template, '\{.*?\}')
+    return process-analyze-string-result ($analyze)
+};
+
+declare function process-analyze-string-result (
+    $result as element (s:analyze-string-result)
+) as xs:string
+{
+
+    let $result-sequence :=
+        for $child in $result/child::*
+        return
+        (
+            if (fn:name($child) = 's:non-match')
+            then ( process-non-match ($child) )
+            else if (fn:name ($child) = 's:match')
+            then ( process-match ($child) )
+            else ()
+        )
+
+        return
+        (
+            full-identifier-uri (concat-analyze-string-result ($result-sequence))
+        )
+
+};
+
+declare function full-identifier-uri (
+    $uri-suffix as xs:string
+)
+{
+    fn:concat ( $uri-prefix, $uri-suffix )
+};
+
+declare function concat-analyze-string-result (
+    $result-sequence  (: todo: ask ron how to represent this 'as xs:sequence':)
+) as xs:string
+{
+    fn:string-join($result-sequence,'')
+};
+
+declare function process-non-match (
+    $non-match as element (s:non-match)
+) as xs:string
+{
+    $non-match/string()
+};
+
+declare function process-match (
+    $match as element (s:match)
+) as xs:string
+{
+    process-match-string (discard-match-brackets ($match))
+};
+
+declare function discard-match-brackets (
+    $match as element(s:match)
+) as xs:string
+{
+    fn:substring-before (fn:substring-after ($match,'{'),'}')
+};
+
+declare function process-match-string (
+    $match as xs:string
+)
+{
+    if ( $match = 'guid' )
+    then ( generate-uuid-v4() )
+    else if ( $match = 'now' )
+    (: clean the dateTime :)
+    then ( current-dateTime-as-utc() )
+    else if ( fn:starts-with ($match, 'doi:') )
+    then ( process-doi-template ($match) )
+    else if ( fn:starts-with ($match, 'id:') )
+    then ( process-id-template ($match) )
+    else if ( fn:starts-with ($match, 'time:') )
+    then ( process-time-template ($match) )
+    else if ( fn:starts-with($match, 'file:') )
+    then ( process-file-template ($match) )
+    else if ( fn:starts-with ($match, 'min:') )
+    then ( process-min-template ($match) )
+    else
+    ( 'NOT-AVAILABLE')
+};
+
+declare function process-doi-template (
+    $match as xs:string
+)
+{
+    fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'doi:'), '/', '_')
+};
+
+declare function process-id-template (
+    $match as xs:string
+)
+{
+    fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'id:'), '/', '_')
+};
+
+declare function process-time-template (
+    $match as xs:string
+)
+{
+    fn:substring-after (fn:replace($match, ' ', ''), 'time:')
+};
+
+declare function process-file-template (
+    $match as xs:string
+)
+{
+    if (fn:contains($match, '/'))
+    then (functx:substring-after-last($match, '/'))
+    else (functx:substring-after-last($match, '\'))
+};
+
+declare function process-min-template (
+    $match as xs:string
+)
+{
+    'todo'
+    (: todo: how to process this if the identifier is not this? :)
+};
+
+(: ------------------------------------------------------ :)
+
+(: ------------------------------------------------------ :)
+
+(: uuid/etag generators :)
+
+(: Alternative to sem:uuid-string() if sem: is not available for iop ML license :)
+declare function generate-uuid-v4 (
+) as xs:string
+{
+    let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
+    return
+    string-join
+    (
+        (
+        fn:substring ($x, 1, 8), fn:substring ($x, 9, 4),
+        fn:substring ($x, 13, 4), fn:substring ($x, 17, 4), fn:substring ($x, 21, 14)
+        ),
+        '-'
+    )
+
+};
+
+(: Generate Etag :)
+declare function generate-etag (
+) as xs:string
+{
+    let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
+    return fn:substring ($x, 1, 18)
+
+};
+
+(: ------------------------------------------------------ :)
+
+declare function current-time (
+) as xs:string
+{
+    fn:substring-before(fn:string(fn:current-dateTime()), '+')
+};
+
+declare function dateTime-as-utc (
+	$time as xs:dateTime
+) as xs:dateTime
+{
+	fn:adjust-dateTime-to-timezone ($time, xs:dayTimeDuration("PT0H"))
+};
+
+declare function current-dateTime-as-utc (
+) as xs:dateTime
+{
+	fn:adjust-dateTime-to-timezone (fn:current-dateTime(), xs:dayTimeDuration("PT0H"))
+};
+
+(: ------------------------------------------------------ :)
+(: ------------------------------------------------------ :)
+(: ------------------------------------------------------ :)
+
+(: Cruft, soon to be deleted :)
+
+(: generate identifier's system information :)
+declare function identifier-system-info (
+$etag as xs:string
+) as element(i:system)
+{
+    <i:system xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">
+        <i:created>{current-dateTime-as-utc()}</i:created>
+        <i:etag>{$etag}</i:etag>
+    </i:system>
+};
+
+(: identifier xml :)
+declare function identifier-info (
+    $id-system-info (:as element(i:system)?:),
+    $annotations (:as element(i:annotation)?:)
+) as element(i:identifier-info)
+{
+    <i:identifier-info xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">
+    {
+    $id-system-info,
+    $annotations
+    }
+    </i:identifier-info>
+};
+
+(: check incoming identifier annotation xml :)
+declare function check-identifier-annotation(
+    $annotation as element()
+) as xs:boolean
+{
+    fn:name($annotation) = 'i:annotation'
+};
+
+(: get identifier's etag from system info :)
+declare function etag-for-identifier (
+$doc as element()
+) as xs:string
+{
+    $doc/i:system/i:etag/string()
+};
+
+
+(: ------------------------------------------------------ :)
+
