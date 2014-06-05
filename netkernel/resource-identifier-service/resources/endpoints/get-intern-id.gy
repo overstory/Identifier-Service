@@ -1,0 +1,6 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+id=context.getThisRequest().getArgumentValue("url")
+rep="url: "+id;
+resp=context.createResponseFrom(rep);
+resp.setMimeType("text/plain")

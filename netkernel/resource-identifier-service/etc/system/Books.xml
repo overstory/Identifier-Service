@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+	<book>
+		<id>book:urn:overstory.co.uk:service:resource:identifier</id>
+		<title>Identifier Service</title>
+		<desc>REST Service to allocate and manage unique IDs</desc>
+		<toc>
+			<item id="urn:overstory.co.uk:service:resource:identifier:guide"/>
+			
+		</toc>
+	</book>
+</books>

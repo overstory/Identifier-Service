@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tests>
+	<test>
+		<id>test:urn:overstory.co.uk:service:resource:identifier</id>
+		<name>Identifier Service</name>
+		<desc>REST Service to allocate and manage unique IDs</desc>
+		<uri>res:/resources/test/testlist.xml</uri>
+	</test>
+</tests>

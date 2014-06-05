@@ -1,0 +1,7 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+id=context.getThisRequest().getArgumentValue("id")
+template=context.source("arg:template")
+rep="id: $id template: $template";
+resp=context.createResponseFrom(rep);
+resp.setMimeType("text/plain")

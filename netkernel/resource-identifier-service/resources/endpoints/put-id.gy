@@ -1,0 +1,7 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+id=context.getThisRequest().getArgumentValue("id")
+println("PUT id: "+id);
+rep=context.source("arg:body")
+resp=context.createResponseFrom(rep);
+resp.setMimeType("text/xml")	//Mimetype TBD

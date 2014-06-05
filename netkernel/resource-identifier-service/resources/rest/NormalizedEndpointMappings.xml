@@ -1,0 +1,55 @@
+<config>
+		<endpoint>
+		<meta>
+			<todo owner="pjr" progress="10">
+			</todo>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:normalized/content/id-GET</identifier>
+				<argument name="id"/>
+				<argument name="pub-status"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/iopREST-content-id-GET-Normalized.gy</argument>
+			<argument name="id">arg:id</argument>
+			<argument name="pub-status">arg:pub-status</argument>
+		</request>
+	</endpoint>
+
+		<!-- ============================================================================ -->
+
+
+	<endpoint>
+		<grammar>
+			<simple>active:ml/fullurl{path}</simple>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">
+				<literal type="string">
+					fullUrl = "http://" + context.source ("arg:host") + ":" + context.source ("arg:port") + context.source ("arg:path")
+					context.createResponseFrom (fullUrl)
+				</literal>
+			</argument>
+			<argument name="host">active:ml/creds/host</argument>
+			<argument name="port">active:ml/creds/port</argument>
+			<argument name="path" method="as-string">arg:path</argument>
+			<representation>java.lang.String</representation>
+		</request>
+	</endpoint>
+
+	<endpoint>
+		<grammar>
+			<simple>active:ml/creds/{field}</simple>
+		</grammar>
+		<request>
+			<identifier>active:xpath2</identifier>
+			<argument name="operator" method="as-string">string(/httpCredentials/[[arg:field]])</argument>
+			<argument name="operand">res:/resources/http-call/http-credentials.xml</argument>
+		</request>
+	</endpoint>
+
+</config>

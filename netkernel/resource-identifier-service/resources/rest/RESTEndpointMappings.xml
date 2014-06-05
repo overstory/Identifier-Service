@@ -1,0 +1,160 @@
+<config>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier</simple>
+				<method>POST</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/new-identifier</identifier>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/create-new-id.gy</argument>
+			<argument name="template">httpRequest:/param/template</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/id/{id}</simple>
+				<method>GET</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/get-id</identifier>
+				<argument name="id"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/get-id.gy</argument>
+			<argument name="id">arg:id</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/id/{id}</simple>
+				<method>PUT</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/put-id</identifier>
+				<argument name="id"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/put-id.gy</argument>
+			<argument name="id">arg:id</argument>
+			<argument name="body">httpRequest:/body</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/id/{id}</simple>
+				<method>DELETE</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/delete-id</identifier>
+				<argument name="id"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/delete-id.gy</argument>
+			<argument name="id">arg:id</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/version/{id}</simple>
+				<method>POST</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/version-id</identifier>
+				<argument name="id"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/version-id.gy</argument>
+			<argument name="id">arg:id</argument>
+			<argument name="template">httpRequest:/param/template</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/extern/{id}</simple>
+				<method>GET</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/get-extern-url</identifier>
+				<argument name="id"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/get-extern-url.gy</argument>
+			<argument name="id">arg:id</argument>
+		</request>
+	</endpoint>
+=====================================================================
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier/intern/{url}</simple>
+				<method>GET</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/get-intern-id</identifier>
+				<argument name="url"/>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/get-intern-id.gy</argument>
+			<argument name="url">arg:url</argument>
+		</request>
+	</endpoint>
+
+=====================================================================
+
+</config>
