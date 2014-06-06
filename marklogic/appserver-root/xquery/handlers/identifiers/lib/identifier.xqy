@@ -63,12 +63,18 @@ declare function generate-unique-id (
 (: ------------------------------------------------------ :)
 
 declare function validate-annotation (
-	$post-body as document-node()?
+	$post-body as element(i:annotation)?
 ) as element(i:annotation)?
 {
+	$post-body
+
+(:
 	if (fn:empty ($post-body))
 	then ()
-	else $post-body/i:annotation	(: Will cause exception if body is not an i:annotation element because of function's declared return type :)
+	else $post-body/i:annotation	 :)
+(: Will cause exception if body is not an i:annotation element because of function's declared return type :)(:
+
+ :)
 };
 
 
@@ -80,19 +86,21 @@ declare function clear-annotation (
 {
 	if (fn:exists ($old-id-info/i:annotation))
 	then
+		let $updated := <i:updated>{ current-dateTime-as-utc() }</i:updated>
+		let $history-event := <i:delete-annotation when="{ current-dateTime-as-utc() }"/>
 		let $doc := mem:node-delete ($old-id-info/i:annotation)
-		let $doc := mem:node-replace ($doc/i:system/i:etag, <i:etag>{ generate-etag() }</i:etag>)
+		let $doc := mem:node-replace ($doc/i:identifier-info/i:system/i:etag, <i:etag>{ generate-etag() }</i:etag>)
 		let $doc :=
-			if (fn:exists ($doc/i:system/i:updated))
-			then mem:node-replace ($doc/i:system/i:updated, <i:updated>{ current-dateTime-as-utc() }</i:updated>)
-			else mem:node-insert-after ($doc/i:system/i:created, <i:updated>{ current-dateTime-as-utc() }</i:updated>)
+			if (fn:exists ($doc/i:identifier-info/i:system/i:updated))
+			then mem:node-replace ($doc/i:identifier-info/i:system/i:updated, $updated)
+			else mem:node-insert-after ($doc/i:identifier-info/i:system/i:created, $updated)
 		let $doc :=
 			if (fn:exists ($doc/i:system/i:history))
-			then mem:node-insert-child ($doc/i:system/i:history, <i:delete-annotation when="current-dateTime-as-utc()"/>)
-			else mem:node-insert-child ($doc/i:system, <i:history><i:updated>{ current-dateTime-as-utc() }</i:updated></i:history>)
-		let $_ := store-identifier-doc ($doc)
+			then mem:node-insert-child ($doc/i:identifier-info/i:system/i:history, $history-event)
+			else mem:node-insert-child ($doc/i:identifier-info/i:system, <i:history>{ $history-event }</i:history>)
+		let $_ := store-identifier-doc ($doc/i:identifier-info)
 
-		return $doc
+		return $doc/i:identifier-info
 	else
 		$old-id-info
 };
