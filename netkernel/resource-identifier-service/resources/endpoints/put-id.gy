@@ -1,7 +1,86 @@
+import org.netkernel.client.http.representation.HttpClientResponseRepresentation
+import org.netkernel.layer0.nkf.INKFAsyncRequestListener
+import org.netkernel.layer0.nkf.INKFRequest
 import org.netkernel.layer0.nkf.INKFRequestContext
+import org.netkernel.layer0.nkf.INKFRequestReadOnly
+import org.netkernel.layer0.nkf.INKFResponse
+import org.netkernel.layer0.nkf.INKFResponseReadOnly
+import org.netkernel.layer0.nkf.NKFException
 
-id=context.getThisRequest().getArgumentValue("id")
-println("PUT id: "+id);
-rep=context.source("arg:body")
-resp=context.createResponseFrom(rep);
-resp.setMimeType("text/xml")	//Mimetype TBD
+try {
+  INKFRequestContext ctx = context
+
+  String id = ctx.getThisRequest().getArgumentValue("id")
+  String etag = ctx.source ("arg:etag")
+  String mimetype = ctx.source ("arg:mimetype")
+
+  //Create new HTTP credentials state...
+  req=ctx.createRequest("active:httpState")
+  req.setVerb(INKFRequestReadOnly.VERB_NEW)
+  req.addArgument ("credentials", "res:/resources/http-call/http-credentials.xml")
+  req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
+  state = ctx.issueRequest(req)
+
+  req = ctx.createRequest ("active:httpAsyncPut")
+  req.addArgument ("url", ctx.source ("active:ml/fullurl/identifier/id/${id}", String.class))
+  req.addArgument ("config", "res:/resources/http-call/http-config.xml")
+  req.addArgumentByValue ("state", state)
+  req.addArgument ("body", "arg:body")
+  req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
+  if (mimetype != null) req.addArgumentByValue ("headers",
+          """<hds>
+              <Content-Type>${mimetype}</Content-Type>
+              <ETag>${etag}</ETag>
+            </hds>""".toString())
+  req.setRepresentationClass (HttpClientResponseRepresentation.class);
+
+  //Issue the request asynchronously and release this thread back to do work
+  handle=ctx.issueAsyncRequest (req)
+
+  gts=[id];
+
+  //Finally set listener and return this thread
+  handle.setListener (new CompletedPutListener (gts))
+  ctx.setNoResponse()
+
+} catch (e) {
+  e.printStackTrace()
+  throw e
+}
+
+class CompletedPutListener implements INKFAsyncRequestListener
+{
+  def mGTS
+
+  def public CompletedPutListener (gts)
+  {
+    mGTS = gts
+  }
+
+  def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
+  {
+    context.createResponseFrom(aException);
+  }
+
+  //Receive the client request's response and pass through the relevant pieces.
+  def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext ctx2)
+  {
+    //Cut Golden Threads to force re-fetch on next access
+    def req = ctx2.createRequest ("active:cutGoldenThread")
+
+    for (gt in mGTS) {
+      req.addArgument ("id", gt)
+    }
+    ctx2.issueRequest (req)
+
+    HttpClientResponseRepresentation hcrr = resp.getRepresentation() as HttpClientResponseRepresentation
+
+    def responseOuter = ctx2.createResponseFrom (hcrr.getEntity())
+    responseOuter.setMimeType (hcrr.getHeader("content-type"))
+    responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+    responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader ("content-type"))
+    responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+    responseOuter.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+    responseOuter.setHeader ("httpResponse:/header/Server", "")
+  }
+}

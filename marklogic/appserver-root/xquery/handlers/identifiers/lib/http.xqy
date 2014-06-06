@@ -90,7 +90,7 @@ declare function return-etag-conflict (
 	let $_ := xdmp:set-response-content-type ($const:ERROR-XML-MIME-TYPE)
 	let $msg :=
 		if (fn:empty ($given-etag))
-		then "ETag value must be provided on DELETE request, current ETag: " || $existing-etag
+		then "ETag value must be provided on mutation request, current ETag: " || $existing-etag
 		else "Given ETag (" || $given-etag || ") does not match current ETag (" || $existing-etag || ")"
 	return
 	<e:errors>{

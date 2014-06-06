@@ -74,6 +74,7 @@ class CompletedListener implements INKFAsyncRequestListener
     responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
     responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader ("content-type"))
     responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+    responseOuter.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
     responseOuter.setHeader ("httpResponse:/header/Server", "")
   }
 }

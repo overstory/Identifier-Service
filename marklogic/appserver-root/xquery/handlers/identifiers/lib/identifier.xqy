@@ -77,7 +77,6 @@ declare function validate-annotation (
  :)
 };
 
-
 (: ------------------------------------------------------ :)
 
 declare function clear-annotation (
@@ -86,23 +85,65 @@ declare function clear-annotation (
 {
 	if (fn:exists ($old-id-info/i:annotation))
 	then
-		let $updated := <i:updated>{ current-dateTime-as-utc() }</i:updated>
 		let $history-event := <i:delete-annotation when="{ current-dateTime-as-utc() }"/>
-		let $doc := mem:node-delete ($old-id-info/i:annotation)
-		let $doc := mem:node-replace ($doc/i:identifier-info/i:system/i:etag, <i:etag>"{ generate-etag() }"</i:etag>)
-		let $doc :=
-			if (fn:exists ($doc/i:identifier-info/i:system/i:updated))
-			then mem:node-replace ($doc/i:identifier-info/i:system/i:updated, $updated)
-			else mem:node-insert-after ($doc/i:identifier-info/i:system/i:created, $updated)
-		let $doc :=
-			if (fn:exists ($doc/i:system/i:history))
-			then mem:node-insert-child ($doc/i:identifier-info/i:system/i:history, $history-event)
-			else mem:node-insert-child ($doc/i:identifier-info/i:system, <i:history>{ $history-event }</i:history>)
-		let $_ := store-identifier-doc ($doc/i:identifier-info)
+		let $doc := mem:node-delete ($old-id-info/i:annotation)/i:identifier-info
+		let $doc := mem:node-replace ($doc/i:system/i:etag, <i:etag>"{ generate-etag() }"</i:etag>)/i:identifier-info
+		let $doc := append-history ($doc, $history-event)
+		let $_ := store-identifier-doc ($doc)
 
-		return $doc/i:identifier-info
+		return $doc
 	else
 		$old-id-info
+};
+
+(: ------------------------------------------------------ :)
+
+declare function replace-annotation (
+	$old-id-info as element(i:identifier-info),
+	$new-annotation as element(i:annotation)
+) as element(i:identifier-info)
+{
+	if (fn:exists ($old-id-info/i:annotation))
+	then
+	let $_ := xdmp:log ("exists")
+		let $doc := mem:node-replace ($old-id-info/i:annotation, $new-annotation)/i:identifier-info
+		let $doc := update-etag ($doc)
+		let $doc := append-history ($doc, <i:replace-annotation when="{ current-dateTime-as-utc() }"/>)
+		let $_ := store-identifier-doc ($doc)
+		return $doc
+	else
+	let $_ := xdmp:log ("doesn't exist")
+		let $doc := mem:node-insert-child ($old-id-info, $new-annotation)/i:identifier-info
+		let $doc := update-etag ($doc)
+		let $doc := append-history ($doc, <i:add-annotation when="{ current-dateTime-as-utc() }"/>)
+		let $_ := store-identifier-doc ($doc)
+		return $doc
+};
+
+(: ------------------------------------------------------ :)
+
+declare function update-etag (
+	$doc as element(i:identifier-info)
+) as element(i:identifier-info)
+{
+	mem:node-replace ($doc/i:system/i:etag, <i:etag>"{ generate-etag() }"</i:etag>)/i:identifier-info
+};
+
+declare function append-history (
+	$doc as element(i:identifier-info),
+	$history-event as element()
+) as element(i:identifier-info)
+{
+	let $updated := <i:updated>{ current-dateTime-as-utc() }</i:updated>
+	let $doc :=
+		if (fn:exists ($doc/i:system/i:updated))
+		then mem:node-replace ($doc/i:system/i:updated, $updated)/i:identifier-info
+		else mem:node-insert-after ($doc/i:system/i:created, $updated)/i:identifier-info
+	let $doc :=
+		if (fn:exists ($doc/i:system/i:history))
+		then mem:node-insert-child ($doc/i:system/i:history, $history-event)/i:identifier-info
+		else mem:node-insert-child ($doc/i:system, <i:history>{ $history-event }</i:history>)/i:identifier-info
+	return $doc
 };
 
 (: ------------------------------------------------------ :)

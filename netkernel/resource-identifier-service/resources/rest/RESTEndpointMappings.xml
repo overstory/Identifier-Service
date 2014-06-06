@@ -64,6 +64,8 @@
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/endpoints/put-id.gy</argument>
 			<argument name="id">arg:id</argument>
+			<argument name="etag">httpRequest:/header/ETag</argument>
+			<argument name="mimetype">httpRequest:/header/Content-Type</argument>
 			<argument name="body">httpRequest:/body</argument>
 		</request>
 	</endpoint>

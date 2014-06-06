@@ -13,3 +13,5 @@ declare variable $id-info as element(i:identifier-info)? := lib:get-identifier-i
 if (fn:exists ($id-info))
 then http:return-identifer-info-xml ($id-info)
 else http:return-not-found-error-for-id ($id)
+
+(: ToDo: Send Last-Modified header :)
