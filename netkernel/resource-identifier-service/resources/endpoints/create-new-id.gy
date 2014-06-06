@@ -8,10 +8,10 @@ import org.netkernel.layer0.nkf.INKFResponseReadOnly
 import org.netkernel.layer0.nkf.NKFException
 
 try {
-
   INKFRequestContext ctx = context
 
   String template = (ctx.exists ("arg:template")) ? ctx.source("arg:template") : 'resource-{guid}'
+  String mimetype = ctx.source ("arg:mimetype")
 
   //Create new HTTP credentials state...
   req=ctx.createRequest("active:httpState")
@@ -24,8 +24,9 @@ try {
   req.addArgument ("url", ctx.source ("active:ml/fullurl/identifier?template=${template}", String.class))
   req.addArgument ("config", "res:/resources/http-call/http-config.xml")
   req.addArgumentByValue ("state", state)
+  req.addArgument ("body", "arg:body")
   req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
-  //  req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id+xml</Accept></hds>")
+  if (mimetype != null) req.addArgumentByValue ("headers", "<hds><Content-Type>${mimetype}</Content-Type></hds>".toString())
   req.setRepresentationClass (HttpClientResponseRepresentation.class);
 
   //Issue the request asynchronously and release this thread back to do work

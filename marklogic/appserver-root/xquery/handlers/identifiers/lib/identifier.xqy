@@ -89,7 +89,7 @@ declare function clear-annotation (
 		let $updated := <i:updated>{ current-dateTime-as-utc() }</i:updated>
 		let $history-event := <i:delete-annotation when="{ current-dateTime-as-utc() }"/>
 		let $doc := mem:node-delete ($old-id-info/i:annotation)
-		let $doc := mem:node-replace ($doc/i:identifier-info/i:system/i:etag, <i:etag>{ generate-etag() }</i:etag>)
+		let $doc := mem:node-replace ($doc/i:identifier-info/i:system/i:etag, <i:etag>"{ generate-etag() }"</i:etag>)
 		let $doc :=
 			if (fn:exists ($doc/i:identifier-info/i:system/i:updated))
 			then mem:node-replace ($doc/i:identifier-info/i:system/i:updated, $updated)
