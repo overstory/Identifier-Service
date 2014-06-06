@@ -31,9 +31,11 @@
 				<mapper>
 					<config>res:/resources/rest/RESTEndpointMappings.xml</config>
 					<space>
+<!--
 						<import>
 							<uri>urn:uk:co:overstory:http</uri>
 						</import>
+-->
 						<import>
 							<uri>urn:overstory.co.uk:service:resource:identifier:toolbox</uri>
 						</import>
