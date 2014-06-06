@@ -4,6 +4,7 @@ module namespace lib="urn:overstory:modules:data-mesh:handlers:lib:identifier";
 
 import module namespace const="urn:overstory:modules:data-mesh:handlers:lib:constants" at "constants.xqy";
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
+import module namespace mem = "http://xqdev.com/in-mem-update" at "/MarkLogic/appservices/utils/in-mem-update.xqy";
 
 declare namespace e = "http://overstory.co.uk/ns/errors";
 declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
@@ -77,7 +78,23 @@ declare function clear-annotation (
 	$old-id-info as element(i:identifier-info)
 ) as element(i:identifier-info)
 {
-	$old-id-info		(: FIXME FIXME FIXME FIXME :)
+	if (fn:exists ($old-id-info/i:annotation))
+	then
+		let $doc := mem:node-delete ($old-id-info/i:annotation)
+		let $doc := mem:node-replace ($doc/i:system/i:etag, <i:etag>{ generate-etag() }</i:etag>)
+		let $doc :=
+			if (fn:exists ($doc/i:system/i:updated))
+			then mem:node-replace ($doc/i:system/i:updated, <i:updated>{ current-dateTime-as-utc() }</i:updated>)
+			else mem:node-insert-after ($doc/i:system/i:created, <i:updated>{ current-dateTime-as-utc() }</i:updated>)
+		let $doc :=
+			if (fn:exists ($doc/i:system/i:history))
+			then mem:node-insert-child ($doc/i:system/i:history, <i:delete-annotation when="current-dateTime-as-utc()"/>)
+			else mem:node-insert-child ($doc/i:system, <i:history><i:updated>{ current-dateTime-as-utc() }</i:updated></i:history>)
+		let $_ := store-identifier-doc ($doc)
+
+		return $doc
+	else
+		$old-id-info
 };
 
 (: ------------------------------------------------------ :)
