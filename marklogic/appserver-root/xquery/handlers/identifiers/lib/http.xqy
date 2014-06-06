@@ -32,6 +32,28 @@ declare function return-identifer-info-xml (
 	return $id-info
 };
 
+declare function set-created-response-with-location-and-etag (
+	$uri as xs:string,
+	$etag as xs:string,
+	$id-uri-root as xs:string
+) as empty-sequence()
+{
+	let $_ := xdmp:set-response-code (201, "Created")
+	let $_ := xdmp:add-response-header ("Location", fn:concat ($id-uri-root, $uri))
+	let $_ := xdmp:add-response-header ("X-URI", $uri)
+	let $_ := xdmp:add-response-header ("ETag", $etag)
+	return ()
+};
+
+declare function return-no-content (
+	$new-etag as xs:string?
+) as empty-sequence()
+{
+	let $_ := xdmp:set-response-code (204, "No Content")
+	let $_ := xdmp:add-response-header ("ETag", $new-etag)
+	return ()
+};
+
 declare function return-bad-request-error (
 	$error as element()*
 ) as element(e:errors)
@@ -59,16 +81,25 @@ declare function return-not-found-error-for-id (
 	}</e:errors>
 };
 
-declare function set-created-response-with-location-and-etag (
-	$location as xs:string,
-	$etag as xs:string,
-	$id-uri-root as xs:string
-) as empty-sequence()
+declare function return-etag-conflict (
+	$existing-etag as xs:string,
+	$given-etag as xs:string?
+) as element(e:errors)
 {
-	let $_ := xdmp:set-response-code (201, "Created")
-	let $_ := xdmp:add-response-header ("Location", fn:concat ($id-uri-root, $location))
-	let $_ := xdmp:add-response-header ("ETag", $etag)
-	return ()
+	let $_ := xdmp:set-response-code (409, "Conflict")
+	let $_ := xdmp:set-response-content-type ($const:ERROR-XML-MIME-TYPE)
+	let $msg :=
+		if (fn:empty ($given-etag))
+		then "ETag value must be provided on DELETE request, current ETag: " || $existing-etag
+		else "Given ETag (" || $given-etag || ") does not match current ETag (" || $existing-etag || ")"
+	return
+	<e:errors>{
+		<e:etag-mismatch>
+			<e:message>{ $msg }</e:message>
+			<e:given-etag>{ $given-etag }</e:given-etag>
+			<e:current-etag>{ $existing-etag }</e:current-etag>
+		</e:etag-mismatch>
+	}</e:errors>
 };
 
 (: ------------------------------------------------------------ :)

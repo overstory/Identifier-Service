@@ -6,3 +6,19 @@ import module namespace anno="urn:overstory:modules:data-mesh:handlers:lib:annot
 
 declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
 declare namespace e = "http://overstory.co.uk/ns/errors";
+
+declare variable $id as xs:string? := xdmp:get-request-field ("id", ());
+declare variable $etag as xs:string? := xdmp:get-request-header ("ETag", ());
+declare variable $id-info as element(i:identifier-info)? := lib:get-identifier-info ($id);
+
+(: ToDo: Check for permission to delete :)
+
+if (fn:empty ($id-info))
+then http:return-not-found-error-for-id ($id)
+else
+	if (fn:not ($id-info/i:system/i:etag = $etag))
+	then http:return-etag-conflict ($id-info/i:system/i:etag/fn:string(), $etag)
+	else (
+		let $new-id-info := lib:clear-annotation ($id-info)
+		return http:return-no-content ($new-id-info/i:system/i:etag)
+	)

@@ -63,7 +63,9 @@ class CompletedPostListener implements INKFAsyncRequestListener
     responseOuter.setMimeType (hcrr.getHeader("Content-Type"))
     responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
     copyHeaderToOuter (responseOuter, hcrr, "Location")
+    copyHeaderToOuter (responseOuter, hcrr, "X-URI")
     copyHeaderToOuter (responseOuter, hcrr, "ETag")
     copyHeaderToOuter (responseOuter, hcrr, "Content-Type")
+    responseOuter.setHeader ("httpResponse:/header/Server", "")
   }
 }

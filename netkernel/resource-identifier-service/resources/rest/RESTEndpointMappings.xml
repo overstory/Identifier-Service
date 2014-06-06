@@ -85,6 +85,7 @@
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/endpoints/delete-id.gy</argument>
 			<argument name="id">arg:id</argument>
+			<argument name="etag">httpRequest:/header/ETag</argument>
 		</request>
 	</endpoint>
 =====================================================================

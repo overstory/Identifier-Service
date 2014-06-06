@@ -14,7 +14,6 @@ declare namespace s ="http://www.w3.org/2005/xpath-functions";
 declare variable $MAX-RETRIES := 20;
 
 declare variable $uri-prefix as xs:string := "urn:overstory.co.uk:id:";
-declare variable $content-directory-prefix := "/data/mesh/";
 declare variable $identifier-directory-prefix := "/identifier/";
 
 declare variable $default-content-type as xs:string := "application/xml";
@@ -71,6 +70,15 @@ declare function validate-annotation (
 	else $post-body/i:annotation	(: Will cause exception if body is not an i:annotation element because of function's declared return type :)
 };
 
+
+(: ------------------------------------------------------ :)
+
+declare function clear-annotation (
+	$old-id-info as element(i:identifier-info)
+) as element(i:identifier-info)
+{
+	$old-id-info		(: FIXME FIXME FIXME FIXME :)
+};
 
 (: ------------------------------------------------------ :)
 
