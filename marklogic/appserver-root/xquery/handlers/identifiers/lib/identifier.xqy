@@ -89,9 +89,7 @@ declare function clear-annotation (
 		let $doc := mem:node-delete ($old-id-info/i:annotation)/i:identifier-info
 		let $doc := mem:node-replace ($doc/i:system/i:etag, <i:etag>"{ generate-etag() }"</i:etag>)/i:identifier-info
 		let $doc := append-history ($doc, $history-event)
-		let $_ := store-identifier-doc ($doc)
-
-		return $doc
+		return store-identifier-doc ($doc)
 	else
 		$old-id-info
 };
@@ -109,15 +107,13 @@ declare function replace-annotation (
 		let $doc := mem:node-replace ($old-id-info/i:annotation, $new-annotation)/i:identifier-info
 		let $doc := update-etag ($doc)
 		let $doc := append-history ($doc, <i:replace-annotation when="{ current-dateTime-as-utc() }"/>)
-		let $_ := store-identifier-doc ($doc)
-		return $doc
+		return store-identifier-doc ($doc)
 	else
 	let $_ := xdmp:log ("doesn't exist")
 		let $doc := mem:node-insert-child ($old-id-info, $new-annotation)/i:identifier-info
 		let $doc := update-etag ($doc)
 		let $doc := append-history ($doc, <i:add-annotation when="{ current-dateTime-as-utc() }"/>)
-		let $_ := store-identifier-doc ($doc)
-		return $doc
+		return store-identifier-doc ($doc)
 };
 
 (: ------------------------------------------------------ :)
@@ -239,11 +235,12 @@ declare function identifier-from-template (
 ) as xs:string
 {
     let $analyze := fn:analyze-string ($template, '\{.*?\}')
-    return process-analyze-string-result ($analyze)
+    return process-analyze-string-result ($analyze, $level)
 };
 
 declare function process-analyze-string-result (
-    $result as element (s:analyze-string-result)
+    $result as element (s:analyze-string-result),
+    $level as xs:int
 ) as xs:string
 {
 
@@ -252,16 +249,13 @@ declare function process-analyze-string-result (
         return
         (
             if (fn:name($child) = 's:non-match')
-            then ( process-non-match ($child) )
+            then process-non-match ($child)
             else if (fn:name ($child) = 's:match')
-            then ( process-match ($child) )
+            then process-match ($child, $level)
             else ()
         )
 
-        return
-        (
-            full-identifier-uri (concat-analyze-string-result ($result-sequence))
-        )
+        return full-identifier-uri (concat-analyze-string-result ($result-sequence))
 
 };
 
@@ -287,10 +281,11 @@ declare function process-non-match (
 };
 
 declare function process-match (
-    $match as element (s:match)
+    $match as element (s:match),
+    $level as xs:int
 ) as xs:string
 {
-    process-match-string (discard-match-brackets ($match))
+    process-match-string (discard-match-brackets ($match), $level)
 };
 
 declare function discard-match-brackets (
@@ -301,7 +296,8 @@ declare function discard-match-brackets (
 };
 
 declare function process-match-string (
-    $match as xs:string
+    $match as xs:string,
+    $level as xs:int
 )
 {
     if ( $match = 'guid' )
@@ -317,8 +313,8 @@ declare function process-match-string (
     then ( process-time-template ($match) )
     else if ( fn:starts-with($match, 'file:') )
     then ( process-file-template ($match) )
-    else if ( fn:starts-with ($match, 'min:') )
-    then ( process-min-template ($match) )
+    else if ( fn:starts-with ($match, 'min') )
+    then ( process-min-template ($match, $level) )
     else
     ( 'NOT-AVAILABLE')
 };
@@ -354,11 +350,14 @@ declare function process-file-template (
 };
 
 declare function process-min-template (
-    $match as xs:string
+    $match as xs:string,
+    $level as xs:int
 )
 {
-    'todo'
-    (: todo: how to process this if the identifier is not this? :)
+	let $default-length := 4
+	let $tokens := fn:tokenize ($match, ": *")
+	let $length := if ((fn:count ($tokens) = 1) or fn:not ($tokens[2] castable as xs:int)) then $default-length else xs:int($tokens[2])
+	return functx:pad-integer-to-length ($level, $length)
 };
 
 (: ------------------------------------------------------ :)
