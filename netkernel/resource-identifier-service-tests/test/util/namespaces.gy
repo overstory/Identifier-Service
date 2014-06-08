@@ -4,19 +4,19 @@ import org.netkernel.layer0.nkf.INKFRequestContext
 
 INKFRequestContext context = context
 
+String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
+String ERROR_MEDIA_TYPE = "application/vnd.overstory.error+xml";
 
-def NamespaceContext usingNamespaces = new SimpleNamespaceContext()
+
+def NamespaceContext namespaces = new SimpleNamespaceContext()
         .withBinding("e", "http://overstory.co.uk/ns/errors")
         .withBinding("i", "http://ns.overstory.co.uk/namespaces/resources/meta/id")
 ;
 
-String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
-String ERROR_MEDIA_TYPE = "application/vnd.overstory.error+xml";
-
-System.setProperty (DOCBUILDER_PROP_NAME, NsDocBuilderFactory.class.getName());
+//System.setProperty (DOCBUILDER_PROP_NAME, NsDocBuilderFactory.class.getName());
 RestAssured.registerParser (ERROR_MEDIA_TYPE, Parser.XML);
 
-context.createResponseFrom (usingNamespaces)
+context.createResponseFrom (namespaces)
 
 
 // -------------------------------------------------------------------------
@@ -133,7 +133,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 public class NsDocBuilderFactory extends DocumentBuilderFactory
 {
   private static final String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
-  private final DocumentBuilderFactory realFactory;
+  private final DocumentBuilderFactory originalFactory;
 
   public NsDocBuilderFactory()
   {
@@ -141,41 +141,41 @@ public class NsDocBuilderFactory extends DocumentBuilderFactory
 
     System.clearProperty (DOCBUILDER_PROP_NAME);
 
-    realFactory = newInstance();
+    originalFactory = DocumentBuilderFactory.newInstance();
 
     System.setProperty (DOCBUILDER_PROP_NAME, propValue);
 
-    realFactory.setNamespaceAware (true);
-    realFactory.setXIncludeAware (true);
+    originalFactory.setNamespaceAware (true);
+    originalFactory.setXIncludeAware (true);
   }
 
   @Override
   public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException
   {
-    return realFactory.newDocumentBuilder();
+    return originalFactory.newDocumentBuilder();
   }
 
   @Override
   public void setAttribute (String s, Object o) throws IllegalArgumentException
   {
-    realFactory.setAttribute (s, o);
+    originalFactory.setAttribute (s, o);
   }
 
   @Override
   public Object getAttribute (String s) throws IllegalArgumentException
   {
-    return realFactory.getAttribute (s);
+    return originalFactory.getAttribute (s);
   }
 
   @Override
   public void setFeature (String s, boolean b) throws ParserConfigurationException
   {
-    realFactory.setFeature (s, b);
+    originalFactory.setFeature (s, b);
   }
 
   @Override
   public boolean getFeature (String s) throws ParserConfigurationException
   {
-    return realFactory.getFeature (s);
+    return originalFactory.getFeature (s);
   }
 }
