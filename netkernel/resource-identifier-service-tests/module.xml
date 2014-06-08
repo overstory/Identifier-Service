@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="2.0">
+	<meta>
+		<identity>
+			<uri>urn:overstory.co.uk:service:resource:identifier:tests</uri>
+			<version>0.1.0</version>
+		</identity>
+		<info>
+			<name>Tests of Overstory Identifier Service</name>
+			<description>Tests for OverStory REST Identifier Service</description>
+			<icon>res:/resources/doc/overstory-icon.png</icon>
+		</info>
+
+	</meta>
+	<system>
+		<dynamic/>
+	</system>
+
+	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:tests" public="true" name="Identifier Service REST">
+
+		<fileset>
+			<regex>res:/etc/system/Tests.xml</regex>
+		</fileset>
+		<fileset>
+			<regex>res:/test/.*</regex>
+		</fileset>
+		<!--ICON-->
+		<fileset>
+			<regex>res:/resources/doc/overstory-icon.png</regex>
+		</fileset>
+
+		<mapper>
+			<config>
+				<endpoint>
+					<grammar>
+						<active>
+							<identifier>active:svcconfig/root</identifier>
+						</active>
+					</grammar>
+					<request>
+						<identifier>active:xpath2</identifier>
+						<argument name="operator"><literal type="string">string(/config/svcroot)</literal></argument>
+						<argument name="operand">res:/test/svcconfig.xml</argument>
+					</request>
+				</endpoint>
+
+				<endpoint>
+					<grammar>
+						<active>
+							<identifier>active:idsvc-namespaces-context</identifier>
+						</active>
+					</grammar>
+					<request>
+						<identifier>active:groovy</identifier>
+						<argument name="operator">res:/test/util/namespaces.gy</argument>
+					</request>
+				</endpoint>
+			</config>
+			<space/>
+		</mapper>
+
+
+		<endpoint><!-- stop any configuration from module under test from polluting address space -->
+			<prototype>Limiter</prototype>
+			<grammar>
+				res:/etc/
+				<regex type="anything" />
+			</grammar>
+		</endpoint>
+
+		<import>
+			<uri>urn:org:netkernel:mod:restassured</uri>
+		</import>
+		<import>
+			<uri>urn:org:netkernel:ext:layer1</uri>
+		</import>
+		<import>
+			<uri>urn:org:netkernel:client:http</uri>
+		</import>
+		<import>
+			<uri>urn:org:netkernel:lang:groovy</uri>
+		</import>
+		<import>
+			<uri>urn:org:netkernel:xml:core</uri>
+		</import>
+		<import>
+			<uri>urn:org:netkernel:xml:saxon</uri>
+		</import>
+
+	</rootspace>
+
+</module>

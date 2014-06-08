@@ -1,0 +1,13 @@
+<testlist>
+	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
+
+
+	<test name="GET /iop/identifier/id/foo">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/get-non-exist.gy</argument>
+			<argument name="svcroot">active:svcconfig/root</argument>
+		</request>
+	</test>
+
+</testlist>

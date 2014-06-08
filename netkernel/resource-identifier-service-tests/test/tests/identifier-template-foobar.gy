@@ -1,0 +1,21 @@
+
+import static com.jayway.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+svcroot = context.source("arg:svcroot")
+
+// Assert empty body and generated ID in Location: header
+given()
+  .queryParam ("template", "foobar")
+  .body("DUMMY REPLACE ME")							//Need to parameterize this body for the tests to be relevant.
+  .header ("Accept", "application/vnd.iop.meta.id+xml")
+.when()
+  .post ("${svcroot}/identifier")
+.then()
+  .statusCode (201)
+  .header ("Location", startsWith ("urn:iop.org:id:foobar"))
+  .header ("Etag", notNullValue ())
+  .body (equalTo(""))
+;
+
+context.createResponseFrom("")

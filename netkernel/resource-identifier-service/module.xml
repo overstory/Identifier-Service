@@ -49,6 +49,7 @@
 				</mapper>
 			</space>
 		</overlay>
+
 		<import>
 			<private/>
 			<uri>urn:org:netkernel:tpt:http</uri>
@@ -116,6 +117,8 @@
          <regex>res:/resources/doc/.*</regex>
       </fileset>
    </rootspace>
+
+<!--
    <rootspace name="Identifier Service - Unit Test Space" public="true" uri="urn:overstory.co.uk:service:resource:identifier:test">
       <fileset>
          <regex>res:/etc/system/Tests.xml</regex>
@@ -123,13 +126,13 @@
       <fileset>
          <regex>res:/resources/test/.*</regex>
       </fileset>
-      <endpoint><!-- stop any configuration from module under test from polluting address space -->
+      <endpoint>&lt;!&ndash; stop any configuration from module under test from polluting address space &ndash;&gt;
          <prototype>Limiter</prototype>
          <grammar>res:/etc/
             <regex type="anything"/>
          </grammar>
       </endpoint>
-      <import><!-- import the main space which we are testing -->
+      <import>&lt;!&ndash; import the main space which we are testing &ndash;&gt;
          <uri>urn:overstory.co.uk:service:resource:identifier</uri>
       </import>
       <import>
@@ -137,4 +140,6 @@
          <private/>
       </import>
    </rootspace>
+-->
+
 </module>

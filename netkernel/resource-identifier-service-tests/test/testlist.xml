@@ -1,0 +1,481 @@
+<testlist>
+	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
+
+	<test name="POST /identifier?template=foobar">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/tests/identifier-template-foobar.gy</argument>
+			<argument name="svcroot">active:iopsvc/root</argument>
+			<representation>java.lang.String</representation>
+		</request>
+	</test>
+
+	<test name="POST /identifier  (default template)">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/tests/identifier-no-template.gy</argument>
+			<argument name="svcroot">active:iopsvc/root</argument>
+			<representation>java.lang.String</representation>
+		</request>
+	</test>
+
+	<!-- ToDo: need negative tests to check error responses (code doesn't parse the template yet) -->
+
+
+	<test name="GET /iop/identifier/id/foo">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator"><literal type="string">
+				import com.jayway.restassured.*;
+				import com.jayway.restassured.config.*;
+				//Assert content type matches
+				given().header("Accept", "application/vnd.iop.meta.id+xml")
+					.get("http://localhost:8080/iop/identifier/id/foo")
+						.then().assertThat()
+							.contentType("application/vnd.iop.meta.id+xml");
+
+				/**Can't get this namespace stuff working yet...*/
+				RestAssured.config.getXmlConfig().namespaceAware(true).declareNamespace("i", "http://ns.iop.org/namespaces/resources/meta/id");
+				given()
+					.header("Accept", "application/vnd.iop.meta.id+xml")
+						.get("http://localhost:8080/iop/identifier/id/foo")
+							.then().assertThat()
+							//.body("'i:identifier-info'.i:system.i:created.text()", equalTo("2014-01-13T22:39:30Z"));
+							//.body(hasXPath("/i:identifier-info/i:system/i:created", new NSContext()) );
+
+				//Just get it as a string and return as test response for extrinsic xunit asserts.
+				s=given()
+					.header("Accept", "application/vnd.iop.meta.id+xml")
+						.get("http://localhost:8080/iop/identifier/id/foo").asString();
+				context.createResponseFrom(s)
+
+				//Attempt to stub out the namespace context - being called but still fails hasXPath()
+				class NSContext implements javax.xml.namespace.NamespaceContext
+				{	public String getNamespaceURI(String prefix)
+					{	println("BEEN CALLED 1: $prefix");
+						return "http://ns.iop.org/namespaces/resources/meta/id";
+					}
+					public String getPrefix(String namespaceURI)
+					{	println("BEEN CALLED 2");
+						return "i";
+					}
+					public Iterator getPrefixes(String namespaceURI)
+					{	return null;
+					}
+				}
+			</literal>
+			</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:identifier-info/i:system/i:created</xpath>
+		</assert>
+	</test>
+	<test name="PUT /iop/identifier/id/foo">
+		<request>
+			<identifier>active:httpPut</identifier>
+			<argument name="url">http://localhost:8080/iop/identifier/id/foo</argument>
+			<argument name="body"><i:annotation  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:annotation</xpath>
+		</assert>
+	</test>
+	<test name="DELETE /iop/identifier/id/foo">
+		<request>
+			<identifier>active:httpDelete</identifier>
+			<argument name="url">http://localhost:8080/iop/identifier/id/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>DELETE id: foo</stringEquals>
+		</assert>
+	</test>
+	<test name="POST /iop/identifier/version/id/foo">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/identifier/version/foo?template=baa</argument>
+			<argument name="body"><i:annotation  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>id: foo template: baa</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/identifier/extern/foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/identifier/extern/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>id: foo</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/identifier/intern/foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/identifier/intern/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>url: foo</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/content?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/content?terms=foo&amp;ipp=1</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/search-results/selected-count='259'</xpath>
+			<xpath>/search-results/returned-count='1'</xpath>
+			<xpath>/search-results/first-result='1'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/content/{container-kind}/id/{id}">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/content/issue/id/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>container-kind: issue id: foo</stringEquals>
+		</assert>
+	</test>
+	article|issue|volume|journal|book|book-part|part|subject|month|conference|conference-series|book-series|conference-paper
+	<test name="GET /iop/article?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/article?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/issue?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/issue?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/volume?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/volume?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/journal?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/journal?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/book?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/book?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/book-part?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/book-part?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/part?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/part?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/subject?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/subject?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/month?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/month?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/conference?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/conference?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/conference-series?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/conference-series?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/book-series?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/book-series?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/conference-paper?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/conference-paper?terms=foo&amp;start-date=20140509</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/terms='foo'</xpath>
+		</assert>
+	</test>
+
+	<test name="POST /iop/event">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/event</argument>
+			<argument name="body"><i:event  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:event</xpath>
+		</assert>
+	</test>
+	<test name="GET /iop/event/id/foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/event/id/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>id: foo</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/event?terms=foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/event?page=foo&amp;ipp=10</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/hds/page='foo'</xpath>
+		</assert>
+	</test>
+
+	<test name="POST /iop/content">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/content</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:content</xpath>
+		</assert>
+	</test>
+
+	<test name="OPTIONS /iop/content/id/foo?pub-status=baa">
+		<!--
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator"><literal type="string">
+				//Assert content type matches
+				//Just get it as a string and return as test response for extrinsic xunit asserts.
+				s=given()
+					.header("Accept", "application/vnd.iop.meta.id+xml")
+						.options("http://localhost:8080/iop/content/id/foo?pub-status=baa").asString();
+				context.createResponseFrom(s)
+			</literal>
+			</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		-->
+		<request>
+			<identifier>active:httpOptions</identifier>
+			<argument name="url">http://localhost:8080/iop/content/id/foo?pub-status=baa</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>id: foo pub-status: baa</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/content/id/0953-8984_17_12_007?pub-status=latest">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/content/id/0953-8984_17_12_007?pub-status=latest</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+		</assert>
+	</test>
+		<test name="GET /iop/content/id/0953-8984_17_12_007?pub-status=latest - REPEAT TO TEST CACHING">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/content/id/0953-8984_17_12_007?pub-status=latest</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<maxTime>10</maxTime>
+		</assert>
+	</test>
+	<test name="PUT /iop/content/id/foo">
+		<request>
+			<identifier>active:httpPut</identifier>
+			<argument name="url">http://localhost:8080/iop/content/id/foo</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:content</xpath>
+		</assert>
+	</test>
+	<test name="DELETE /iop/content/id/foo">
+		<request>
+			<identifier>active:httpDelete</identifier>
+			<argument name="url">http://localhost:8080/iop/content/id/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>DELETE id: foo</stringEquals>
+		</assert>
+	</test>
+
+	<test name="PUT /iop/content/pub-status/foo/published">
+		<request>
+			<identifier>active:httpPut</identifier>
+			<argument name="url">http://localhost:8080/iop/content/pub-status/foo/published</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>PUT id: foo new-pub-status: published</stringEquals>
+		</assert>
+	</test>
+	<test name="GET /iop/content/pub-status/foo">
+		<request>
+			<identifier>active:httpGet</identifier>
+			<argument name="url">http://localhost:8080/iop/content/pub-status/foo</argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<stringEquals>id: foo status: published</stringEquals>
+		</assert>
+	</test>
+
+	<test name="POST /iop/binary">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/binary</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:content</xpath>
+		</assert>
+	</test>
+	<test name="POST /iop/binary?location=foo">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/binary?location=foo</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:content</xpath>
+		</assert>
+	</test>
+	<test name="POST /iop/binary?binary-uri=foo&amp;size=1024&amp;content-type=text/xml">
+		<request>
+			<identifier>active:httpPost</identifier>
+			<argument name="url">http://localhost:8080/iop/binary?binary-uri=foo&amp;size=1024&amp;content-type=text/xml</argument>
+			<argument name="body"><i:content  xmlns:i="http://ns.iop.org/namespaces/resources/meta/id"/></argument>
+			<representation>java.lang.String</representation>
+		</request>
+		<assert>
+			<notNull/>
+			<xpath>/i:content</xpath>
+		</assert>
+	</test>
+	
+</testlist>
