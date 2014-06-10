@@ -1,0 +1,16 @@
+<config>
+		<endpoint>
+		<grammar>
+			<active>
+				<identifier>active:httpState/managed</identifier>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/http/state-manager.gy</argument>
+			<argument name="id">arg:id</argument>
+			<argument name="pub-status">arg:pub-status</argument>
+		</request>
+	</endpoint>
+
+</config>
