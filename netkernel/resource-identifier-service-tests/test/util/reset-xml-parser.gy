@@ -1,0 +1,22 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+// Defunct: delete me
+
+String DOC_BUILDER_FACTORY_PROPERTY = 'javax.xml.parsers.DocumentBuilderFactory'
+String DOC_BUILDER_FACTORY_HOLD_PROPERTY = DOC_BUILDER_FACTORY_PROPERTY + '.hold'
+
+println ("Enter teardown")
+
+INKFRequestContext context = context
+
+factory = System.getProperty (DOC_BUILDER_FACTORY_PROPERTY)
+hold = System.getProperty (DOC_BUILDER_FACTORY_HOLD_PROPERTY)
+
+if (hold != null) {
+  System.setProperty (DOC_BUILDER_FACTORY_PROPERTY, hold);
+  System.clearProperty (DOC_BUILDER_FACTORY_HOLD_PROPERTY)
+}
+
+context.createResponseFrom ((factory != null) ? factory : "")
+
+println ("Exit teardown")
