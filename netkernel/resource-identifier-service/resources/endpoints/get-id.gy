@@ -2,7 +2,6 @@ import org.netkernel.client.http.representation.HttpClientResponseRepresentation
 import org.netkernel.layer0.nkf.INKFAsyncRequestListener
 import org.netkernel.layer0.nkf.INKFRequest
 import org.netkernel.layer0.nkf.INKFRequestContext
-import org.netkernel.layer0.nkf.INKFRequestReadOnly
 import org.netkernel.layer0.nkf.INKFResponseReadOnly
 import org.netkernel.layer0.nkf.NKFException
 
@@ -13,17 +12,10 @@ try {
 
   String id = ctx.getThisRequest().getArgumentValue("id")
 
-//Create new HTTP credentials state...
-  req=ctx.createRequest("active:httpState")
-  req.setVerb(INKFRequestReadOnly.VERB_NEW)
-  req.addArgument ("credentials", "res:/resources/http-call/http-credentials.xml")
-  req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
-  state = ctx.issueRequest(req)
-
   req = ctx.createRequest ("active:httpAsyncGet")
   req.addArgument ("url", ctx.source ("active:ml/fullurl/identifier/id/${id}", String.class))
   req.addArgument ("config", "res:/resources/http-call/http-config.xml")
-  req.addArgumentByValue ("state", state)
+  req.addArgumentByValue ("state", context.source("active:httpState/managed"))
   req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
   req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id+xml</Accept></hds>")
   req.setRepresentationClass (HttpClientResponseRepresentation.class);

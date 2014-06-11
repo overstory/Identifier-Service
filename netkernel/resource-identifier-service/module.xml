@@ -31,11 +31,6 @@
 				<mapper>
 					<config>res:/resources/rest/RESTEndpointMappings.xml</config>
 					<space>
-<!--
-						<import>
-							<uri>urn:uk:co:overstory:http</uri>
-						</import>
--->
 						<import>
 							<uri>urn:overstory.co.uk:service:resource:identifier:toolbox</uri>
 						</import>
@@ -89,11 +84,6 @@
 		<import>
 			<uri>urn:org:netkernel:ext:system</uri>	<!--Required for Exception to DOM Transreptor-->
 		</import>
-<!--
-		<import>
-			<uri>urn:uk:co:overstory:http</uri>
-		</import>
--->
 	</rootspace>
 
 	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:normalized" public="false">
@@ -109,7 +99,7 @@
 			</space>
 		</mapper>
 	</rootspace>
-	
+
 	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="false">
 		<mapper>
 			<config>res:/resources/http/HttpStateMappings.xml</config>
@@ -135,8 +125,6 @@
 		</mapper>
 	</rootspace>
 
-
-
    <rootspace name="Identifier Service - Documentation Space" public="true" uri="urn:overstory.co.uk:service:resource:identifier:doc">
       <fileset>
          <regex>res:/etc/system/(Books|Docs).xml</regex>
@@ -145,29 +133,5 @@
          <regex>res:/resources/doc/.*</regex>
       </fileset>
    </rootspace>
-
-<!--
-   <rootspace name="Identifier Service - Unit Test Space" public="true" uri="urn:overstory.co.uk:service:resource:identifier:test">
-      <fileset>
-         <regex>res:/etc/system/Tests.xml</regex>
-      </fileset>
-      <fileset>
-         <regex>res:/resources/test/.*</regex>
-      </fileset>
-      <endpoint>&lt;!&ndash; stop any configuration from module under test from polluting address space &ndash;&gt;
-         <prototype>Limiter</prototype>
-         <grammar>res:/etc/
-            <regex type="anything"/>
-         </grammar>
-      </endpoint>
-      <import>&lt;!&ndash; import the main space which we are testing &ndash;&gt;
-         <uri>urn:overstory.co.uk:service:resource:identifier</uri>
-      </import>
-      <import>
-         <uri>urn:org:netkernel:ext:layer1</uri>
-         <private/>
-      </import>
-   </rootspace>
--->
 
 </module>
