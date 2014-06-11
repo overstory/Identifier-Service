@@ -10,11 +10,7 @@ String svcroot = context.source("arg:svcroot")
 
 def NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
 
-println (namespaces.toString())
-//println ("fetched namespaces: " + namespaces.getNamespaceURI ("e"))
-//println ("fetched namespaces: " + namespaces.getNamespaceURI ("i"))
-
-// Assert empty body and not found result
+// Assert non-empty body and not found error result for the requested resource
 given()
         .header ("Accept", "application/vnd.iop.meta.id+xml")
 .when()
@@ -22,8 +18,7 @@ given()
 .then()
         .statusCode (404)
         .body (not (empty()))
-//        .body (hasXPath ("/e:errors/e:resource-not-found[e:uri = 'something-very-unlikely-to-exist']", usingNamespaces))
-        .body (hasXPath ("/errors/resource-not-found/uri", namespaces, equalTo ('something-very-unlikely-to-exist')))
+        .body (hasXPath ("/e:errors/e:resource-not-found/e:uri", namespaces, equalTo ('something-very-unlikely-to-exist')))
 ;
 
 context.createResponseFrom("")

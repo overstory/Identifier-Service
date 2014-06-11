@@ -1,8 +1,7 @@
 <testlist>
 	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
 
-
-	<test name="GET /iop/identifier/id/foo">
+	<test name="GET of non-existent identifier resource">
 		<request>
 			<identifier>active:RESTAssured</identifier>
 			<argument name="operator">res:/test/basic-tests/tests/get-non-exist.gy</argument>
@@ -11,3 +10,4 @@
 	</test>
 
 </testlist>
+
