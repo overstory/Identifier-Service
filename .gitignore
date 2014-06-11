@@ -4,3 +4,4 @@ zz.xml
 /.classpath
 /.project
 /out
+*.class
