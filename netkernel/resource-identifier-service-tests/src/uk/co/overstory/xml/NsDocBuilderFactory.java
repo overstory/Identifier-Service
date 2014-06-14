@@ -1,3 +1,6 @@
+
+// This is now defunct and no longer needed
+
 package uk.co.overstory.xml;
 
 import javax.xml.parsers.DocumentBuilder;

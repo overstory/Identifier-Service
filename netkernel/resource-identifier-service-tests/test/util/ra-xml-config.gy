@@ -1,0 +1,27 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import com.jayway.restassured.RestAssured
+import com.jayway.restassured.config.RestAssuredConfig
+import static com.jayway.restassured.config.XmlConfig.*
+
+import com.jayway.restassured.parsing.Parser
+
+INKFRequestContext context = context
+
+// Registering these content types here is probably cheating since they have a side-effect,
+// but I couldn't figure out hw to set this via he config object
+String ERROR_MEDIA_TYPE = "application/vnd.overstory.error+xml";
+String ID_METADATA_MIME_TYPE = "application/vnd.overstory.meta.id+xml";
+
+RestAssured.registerParser (ERROR_MEDIA_TYPE, Parser.XML);
+RestAssured.registerParser (ID_METADATA_MIME_TYPE, Parser.XML);
+
+RestAssuredConfig config = RestAssuredConfig.newConfig().xmlConfig (
+  xmlConfig().with()
+    .namespaceAware(true)
+    .declareNamespace ("e", "http://overstory.co.uk/ns/errors")
+    .declareNamespace ("i", "http://ns.overstory.co.uk/namespaces/resources/meta/id")
+)
+
+context.createResponseFrom (config)
+

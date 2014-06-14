@@ -47,6 +47,18 @@
 				<endpoint>
 					<grammar>
 						<active>
+							<identifier>active:idsvc-ra-xml-config</identifier>
+						</active>
+					</grammar>
+					<request>
+						<identifier>active:groovy</identifier>
+						<argument name="operator">res:/test/util/ra-xml-config.gy</argument>
+					</request>
+				</endpoint>
+
+				<endpoint>
+					<grammar>
+						<active>
 							<identifier>active:idsvc-namespaces-context</identifier>
 						</active>
 					</grammar>
@@ -55,6 +67,7 @@
 						<argument name="operator">res:/test/util/namespaces.gy</argument>
 					</request>
 				</endpoint>
+
 			</config>
 			<space/>
 		</mapper>

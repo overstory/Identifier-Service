@@ -1,26 +1,26 @@
-import com.jayway.restassured.RestAssured
-import com.jayway.restassured.parsing.Parser
+import com.jayway.restassured.config.RestAssuredConfig
 import org.netkernel.layer0.nkf.INKFRequestContext
 import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
 
-//String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
-String ERROR_MEDIA_TYPE = "application/vnd.overstory.error+xml";
+// The list of namespaces is defined in the REST Assured XML config resource
+RestAssuredConfig config = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
 
+SimpleNamespaceContext namespaces = new SimpleNamespaceContext()
 
-def NamespaceContext namespaces = new SimpleNamespaceContext()
-        .withBinding("e", "http://overstory.co.uk/ns/errors")
-        .withBinding("i", "http://ns.overstory.co.uk/namespaces/resources/meta/id")
-;
-
-//System.setProperty (DOCBUILDER_PROP_NAME, NsDocBuilderFactory.class.getName());
-RestAssured.registerParser (ERROR_MEDIA_TYPE, Parser.XML);
+// Copy the namespace declarations from the XML config, add to the NS context object
+config.xmlConfig.declaredNamespaces() each { ns ->
+	namespaces.withBinding (ns.getKey(), ns.getValue())
+}
 
 context.createResponseFrom (namespaces)
 
 
 // -------------------------------------------------------------------------
+// The following class is defined in the package org.xmlmatchers.namespace,
+// which is part of the Hamcrest stuff, but doesn't seem to be a part of
+// the NK distribution of REST Assured.  Reproducing it here out of laziness.
 
 /*
  * Copyright 2010 the original author or authors.
