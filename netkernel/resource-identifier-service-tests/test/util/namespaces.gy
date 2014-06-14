@@ -1,10 +1,11 @@
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.parsing.Parser
 import org.netkernel.layer0.nkf.INKFRequestContext
+import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
 
-String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
+//String DOCBUILDER_PROP_NAME = "javax.xml.parsers.DocumentBuilderFactory";
 String ERROR_MEDIA_TYPE = "application/vnd.overstory.error+xml";
 
 
@@ -38,10 +39,7 @@ context.createResponseFrom (namespaces)
  */
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException;
+//import javax.xml.namespace.NamespaceContext
 
 /**
  * A simple, mutable {@link NamespaceContext} implementation.
