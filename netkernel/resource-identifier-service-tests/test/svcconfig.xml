@@ -1,3 +1,10 @@
 <config>
-	<svcroot>http://localhost:8080/idsvc</svcroot>
+	<!-- See: https://code.google.com/p/rest-assured/wiki/Usage#Default_values -->
+	<baseURI>http://localhost</baseURI>
+	<port>8080</port>
+	<basePath>/idsvc</basePath>
+<!--
+	<authentication>basic("username", "password")</authentication>
+	<rootPath>x.y.z</rootPath>
+-->
 </config>

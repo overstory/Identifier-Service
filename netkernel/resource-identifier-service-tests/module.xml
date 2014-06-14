@@ -33,13 +33,11 @@
 			<config>
 				<endpoint>
 					<grammar>
-						<active>
-							<identifier>active:svcconfig/root</identifier>
-						</active>
+						<simple>res:/svcconfig/{field}</simple>
 					</grammar>
 					<request>
 						<identifier>active:xpath2</identifier>
-						<argument name="operator"><literal type="string">string(/config/svcroot)</literal></argument>
+						<argument name="operator" method="as-string">string(/config/[[arg:field]])</argument>
 						<argument name="operand">res:/test/svcconfig.xml</argument>
 					</request>
 				</endpoint>
