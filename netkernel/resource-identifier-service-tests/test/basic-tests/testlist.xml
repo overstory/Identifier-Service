@@ -1,11 +1,29 @@
 <testlist>
 	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
 
+	<test name="REST Assured Static Setup">
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/test/util/ra-static-state-setup.gy</argument>
+		</request>
+	</test>
+
+	<!-- ===================================================================== -->
+
 	<test name="GET of non-existent identifier resource">
 		<request>
 			<identifier>active:RESTAssured</identifier>
 			<argument name="operator">res:/test/basic-tests/tests/get-non-exist.gy</argument>
 			<argument name="svcroot">active:svcconfig/root</argument>
+		</request>
+	</test>
+
+	<!-- ===================================================================== -->
+
+	<test name="Reset REST Assured Static State">
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/test/util/ra-reset-static-state.gy</argument>
 		</request>
 	</test>
 

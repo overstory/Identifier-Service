@@ -1,0 +1,9 @@
+import org.netkernel.layer0.nkf.INKFResponse
+import com.jayway.restassured.RestAssured
+import com.jayway.restassured.parsing.Parser
+
+RestAssured.registerParser ("application/vnd.overstory.error+xml", Parser.XML);
+RestAssured.registerParser ("application/vnd.overstory.meta.id+xml", Parser.XML);
+
+resp = context.createResponseFrom ("")
+resp.setExpiry (INKFResponse.EXPIRY_ALWAYS)

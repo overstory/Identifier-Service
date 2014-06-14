@@ -1,0 +1,7 @@
+import org.netkernel.layer0.nkf.INKFResponse
+import com.jayway.restassured.RestAssured
+
+RestAssured.reset()
+
+resp = context.createResponseFrom ("")
+resp.setExpiry (INKFResponse.EXPIRY_ALWAYS)

@@ -1,5 +1,5 @@
-import com.jayway.restassured.config.RestAssuredConfig
 import org.netkernel.layer0.nkf.INKFRequestContext
+import com.jayway.restassured.config.RestAssuredConfig
 import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
@@ -9,9 +9,9 @@ RestAssuredConfig config = context.source ("active:idsvc-ra-xml-config", RestAss
 
 SimpleNamespaceContext namespaces = new SimpleNamespaceContext()
 
-// Copy the namespace declarations from the XML config, add to the NS context object
+// Copy the namespace declarations from the XML config, add to the new NamespaceContext object
 config.xmlConfig.declaredNamespaces() each { ns ->
-	namespaces.withBinding (ns.getKey(), ns.getValue())
+	namespaces.bind (ns.getKey(), ns.getValue())
 }
 
 context.createResponseFrom (namespaces)
