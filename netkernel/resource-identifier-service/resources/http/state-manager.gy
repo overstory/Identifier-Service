@@ -1,23 +1,26 @@
 import org.netkernel.layer0.nkf.INKFRequestContext
 import org.netkernel.layer0.nkf.INKFRequestReadOnly
 import org.netkernel.layer0.nkf.INKFRequest
-INKFRequestContext ctx = context
 
-pdsid="pds:/overstory/service/identifier/httpState"
+INKFRequestContext context = context
+
+def pdsid = "pds:/overstory/service/identifier/httpState"
+
+def state;
+
 try
-{	state=ctx.source(pdsid)
-}
-catch(Exception e)
 {
-	//Create new HTTP credentials state...
-	req=ctx.createRequest("active:httpState")
-	req.setVerb(INKFRequestReadOnly.VERB_NEW)
-	req.addArgument ("credentials", "res:/resources/http-call/http-credentials.xml")
-	req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
-	state = ctx.issueRequest(req)
+  state = context.source (pdsid)
+} catch (Exception e) {
+  //Create new HTTP credentials state...
+  req = context.createRequest ("active:httpState")
+  req.setVerb (INKFRequestReadOnly.VERB_NEW)
+  req.addArgument ("credentials", "res:/resources/http-call/http-credentials.xml")
+  req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
+  state = context.issueRequest (req)
 
-	//SINK the http state identifier to PDS so we can treat it as a singleton from now on
-	context.sink(pdsid, state)
+  //SINK the http state identifier to PDS so we can treat it as a singleton from now on
+  context.sink (pdsid, state)
 }
 
-context.createResponseFrom(state)
+context.createResponseFrom (state)
