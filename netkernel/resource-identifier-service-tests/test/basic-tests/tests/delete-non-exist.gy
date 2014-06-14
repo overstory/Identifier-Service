@@ -12,15 +12,8 @@ NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context",
 // Assert non-empty body and not found error result for the requested resource
 given()
 	.config (xmlconfig)
-	.contentType ("application/vnd.overstory.co.uk.meta.id+xml")
-	.body("""<i:identifier-info xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
-		    <i:annotation>
-			<i:doi>10.1088/245345-3452345-5256</i:doi>
-			<i:content-type>image/png</i:content-type>
-		    </i:annotation>
-		</i:identifier-info>""")
 .when()
-	.put ("/identifier/id/something-very-unlikely-to-exist")
+	.delete ("/identifier/id/something-very-unlikely-to-exist")
 .then()
 	.statusCode (404)
 	.body (not (empty()))

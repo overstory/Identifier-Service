@@ -24,6 +24,13 @@
 		</request>
 	</test>
 
+	<test name="DELETE of non-existent identifier resource">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/delete-non-exist.gy</argument>
+		</request>
+	</test>
+
 	<!-- ===================================================================== -->
 
 	<test name="Reset REST Assured Static State">

@@ -17,7 +17,7 @@ given()
 	.get ("/identifier/id/something-very-unlikely-to-exist")
 .then()
 	.statusCode (404)
-	.body (not (empty ()))
+	.body (not (empty()))
 	.body (hasXPath ("/e:errors/e:resource-not-found/e:uri", namespaces, equalTo ('something-very-unlikely-to-exist')))
 ;
 
