@@ -2,17 +2,23 @@ import org.netkernel.layer0.nkf.INKFRequestContext
 import org.netkernel.layer0.nkf.INKFResponse
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.parsing.Parser
+import org.netkernel.layer0.representation.IHDSNode
 
 INKFRequestContext context = context
 
 // These values are stored in an XML file parsed by the res:/svcconfig resource, they
 // correspond to the REST Assured properties described at: https://code.google.com/p/rest-assured/wiki/Usage#Default_values
-RestAssured.baseURI = context.source ("res:/svcconfig/baseURI")
-RestAssured.port = context.source ("res:/svcconfig/port", Integer.class)
-RestAssured.basePath = context.source ("res:/svcconfig/basePath")
+RestAssured.baseURI = context.source ("res:/svcconfig/string/baseURI")
+RestAssured.port = context.source ("res:/svcconfig/string/port", Integer.class)
+RestAssured.basePath = context.source ("res:/svcconfig/string/basePath")
 
-RestAssured.registerParser ("application/vnd.overstory.error+xml", Parser.XML);
-RestAssured.registerParser ("application/vnd.overstory.meta.id+xml", Parser.XML);
+// These are content types produced by this service that should be parsed as XML, defined in res:/svcconfig
+IHDSNode xmlContentTypes = context.source ("res:/svcconfig/xml/xmlContentTypes", IHDSNode.class)
 
+xmlContentTypes.getValues ("xmlContentTypes/xmlContentType") each { String ct ->
+	RestAssured.registerParser (ct, Parser.XML)
+}
+
+// Return an empty response, and disallow caching since there are static object side effects from the call to RestAssured.registerParser
 resp = context.createResponseFrom ("")
 resp.setExpiry (INKFResponse.EXPIRY_ALWAYS)

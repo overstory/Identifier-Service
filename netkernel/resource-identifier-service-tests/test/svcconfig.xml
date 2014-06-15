@@ -7,4 +7,18 @@
 	<authentication>basic("username", "password")</authentication>
 	<rootPath>x.y.z</rootPath>
 -->
+	<xmlContentTypes>
+		<xmlContentType>application/vnd.overstory.error+xml</xmlContentType>
+		<xmlContentType>application/vnd.overstory.meta.id+xml</xmlContentType>
+	</xmlContentTypes>
+	<namespaceBindings>
+		<namespaceBinding>
+			<prefix>e</prefix>
+			<uri>http://overstory.co.uk/ns/errors</uri>
+		</namespaceBinding>
+		<namespaceBinding>
+			<prefix>i</prefix>
+			<uri>http://ns.overstory.co.uk/namespaces/resources/meta/id</uri>
+		</namespaceBinding>
+	</namespaceBindings>
 </config>
