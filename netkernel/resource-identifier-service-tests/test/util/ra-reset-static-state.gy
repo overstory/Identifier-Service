@@ -1,6 +1,7 @@
 import org.netkernel.layer0.nkf.INKFResponse
 import com.jayway.restassured.RestAssured
 
+// Clear default settings from the REST Assured static state so as not to affect other test suites.
 RestAssured.reset()
 
 resp = context.createResponseFrom ("")

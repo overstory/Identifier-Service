@@ -6,15 +6,16 @@ import static com.jayway.restassured.config.XmlConfig.*
 
 INKFRequestContext context = context
 
-// Setup REST Assured XML configuration, start by creating a config object with namespace-aware set true
+// Setup a REST Assured XML configuration.  Start by creating a config object and
+// set the namespace-aware flag according to the config file setting.
 RestAssuredConfig config = RestAssuredConfig.newConfig().xmlConfig (
-	xmlConfig().with().namespaceAware (true)
+	xmlConfig().namespaceAware (context.source ("res:/svcconfig/string/namespaceAware", Boolean.class))
 )
 
-// Namespace binding are defined in the XML file at res:/svcconfig
+// Namespace bindings are defined in the XML file at res:/svcconfig
 IHDSNode namespaceBindings = context.source ("res:/svcconfig/xml/namespaceBindings", IHDSNode.class)
 
-// Add each namespace binding to the config.  These literate calls return new objects, ust re-assign config each time
+// Add each namespace binding to the config.  These literate calls return new objects, must re-assign config each time.
 namespaceBindings.getNodes ("namespaceBindings/namespaceBinding") each { IHDSNode binding ->
 	String prefix = binding.getFirstValue ("prefix") as String
 	String uri = binding.getFirstValue ("uri") as String
@@ -22,5 +23,7 @@ namespaceBindings.getNodes ("namespaceBindings/namespaceBinding") each { IHDSNod
 	config = config.xmlConfig (config.getXmlConfig().declareNamespace (prefix, uri))
 }
 
-// The XML config object is returned, for use in REST Assured hasXPath tests
+println ("ra-xml-config called")
+
+// The XML config object is returned, for use in REST Assured given() clauses
 context.createResponseFrom (config)

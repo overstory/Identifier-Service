@@ -7,6 +7,7 @@
 	<authentication>basic("username", "password")</authentication>
 	<rootPath>x.y.z</rootPath>
 -->
+	<namespaceAware>true</namespaceAware>
 	<xmlContentTypes>
 		<xmlContentType>application/vnd.overstory.error+xml</xmlContentType>
 		<xmlContentType>application/vnd.overstory.meta.id+xml</xmlContentType>
