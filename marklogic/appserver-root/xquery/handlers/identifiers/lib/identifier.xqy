@@ -366,7 +366,7 @@ declare function process-min-template (
 
 (: uuid/etag generators :)
 
-(: Alternative to sem:uuid-string() if sem: is not available for iop ML license :)
+(: Alternative to sem:uuid-string() if sem: is not available for ML license :)
 declare function generate-uuid-v4 (
 ) as xs:string
 {

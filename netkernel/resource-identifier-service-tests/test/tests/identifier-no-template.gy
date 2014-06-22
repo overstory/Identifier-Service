@@ -8,12 +8,12 @@ svcroot = context.source("arg:svcroot")
 
 // Assert empty body and generated ID with default template
 given()
-  .header ("Accept", "application/vnd.iop.meta.id+xml")
+  .header ("Accept", "application/vnd.overstory.meta.id+xml")
 .when()
   .post ("${svcroot}/identifier")
 .then()
   .statusCode (201)
-  .header ("Location", startsWith ("urn:iop.org:id:resource-"))
+  .header ("Location", startsWith ("urn:overstory.co.uk:id:resource-"))
   .header ("Etag", notNullValue ())
   .body (equalTo(""))
 ;

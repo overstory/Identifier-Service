@@ -1,6 +1,6 @@
 <tests>
   <test>
-    <id>urn:test:uk:co:overstory:iop:rest</id>
+    <id>urn:test:uk:co:overstory:identifier:rest</id>
     <name>Basic API Tests</name>
     <desc>Basic Identifier Service API Tests</desc>
     <uri>res:/test/basic-tests/testlist.xml</uri>
