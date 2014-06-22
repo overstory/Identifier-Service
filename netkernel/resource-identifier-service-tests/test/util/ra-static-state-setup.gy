@@ -19,6 +19,6 @@ xmlContentTypes.getValues ("xmlContentTypes/xmlContentType") each { String ct ->
 	RestAssured.registerParser (ct, Parser.XML)
 }
 
-// Return an empty response, and disallow caching since there are static object side effects from the call to RestAssured.registerParser
-resp = context.createResponseFrom ("")
+// Return true, and disallow caching since there are static object side effects from the call to RestAssured.registerParser
+resp = context.createResponseFrom (true)
 resp.setExpiry (INKFResponse.EXPIRY_ALWAYS)

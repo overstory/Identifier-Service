@@ -6,10 +6,12 @@ import static org.hamcrest.Matchers.*
 import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
+
+assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
+
 RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
 NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
 
-// Assert non-empty body and not found error result for the requested resource
 given()
 	.config (xmlconfig)
 	.contentType ("application/vnd.overstory.co.uk.meta.id+xml")
@@ -27,4 +29,4 @@ given()
 	.body (hasXPath ("/e:errors/e:resource-not-found/e:uri", namespaces, equalTo ('something-very-unlikely-to-exist')))
 ;
 
-context.createResponseFrom ("")
+context.createResponseFrom (true)

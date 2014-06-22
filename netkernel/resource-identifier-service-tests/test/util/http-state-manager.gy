@@ -1,0 +1,26 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+import org.netkernel.layer0.nkf.INKFRequestReadOnly
+import org.netkernel.layer0.nkf.INKFRequest
+
+INKFRequestContext context = context
+
+def pdsid = "pds:/overstory/service/identifier/httpState/test-rig"
+
+def stateId;
+
+try {
+	stateId = context.source (pdsid, String.class)
+	context.source (stateId)	// Source the httpState resource to make sure it still exists
+} catch (Exception e) {
+	//Create new HTTP credentials state...
+	req = context.createRequest ("active:httpState")
+	req.setVerb (INKFRequestReadOnly.VERB_NEW)
+	req.addArgument ("credentials", "res:/config/http-credentials.xml")
+	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
+	stateId = context.issueRequest (req)
+
+	//SINK the http state identifier to PDS so we can treat it as a singleton from now on
+	context.sink (pdsid, stateId)
+}
+
+context.createResponseFrom (stateId)

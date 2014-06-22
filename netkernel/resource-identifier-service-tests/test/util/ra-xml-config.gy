@@ -23,7 +23,5 @@ namespaceBindings.getNodes ("namespaceBindings/namespaceBinding") each { IHDSNod
 	config = config.xmlConfig (config.getXmlConfig().declareNamespace (prefix, uri))
 }
 
-println ("ra-xml-config called")
-
 // The XML config object is returned, for use in REST Assured given() clauses
 context.createResponseFrom (config)

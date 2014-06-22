@@ -1,0 +1,39 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+
+for (i = 0; i < 3; i++) {
+	def templateRoot = "myid:${i}:"
+	def idRoot = "urn:overstory.co.uk:id:"
+
+	given()
+		.config (xmlconfig)
+		.queryParam ("template", "${templateRoot}{guid}".toString ())
+		.body ("")
+	.when()
+		.post ("/identifier")
+	.then()
+		.log().ifStatusCodeMatches (not(201))
+		.statusCode (201)
+		.body (equalTo (""))
+		.header ("Location", not (empty ()))
+		.header ("Location", startsWith ("/identifier/id/${idRoot}${templateRoot}"))
+		.header ("X-URI", not (empty ()))
+		.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+		.header ("ETag", not (empty ()))
+	;
+}
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 3)
+
+context.createResponseFrom (true)
+

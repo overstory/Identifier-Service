@@ -1,12 +1,14 @@
 <testlist>
 	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
 
+<!--
 	<test name="REST Assured Static Setup">
 		<request>
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/test/util/ra-static-state-setup.gy</argument>
 		</request>
 	</test>
+-->
 
 	<!-- ===================================================================== -->
 
@@ -28,6 +30,22 @@
 		<request>
 			<identifier>active:RESTAssured</identifier>
 			<argument name="operator">res:/test/basic-tests/tests/delete-non-exist.gy</argument>
+		</request>
+	</test>
+
+	<!-- ===================================================================== -->
+
+	<test name="Create three GUID Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-three-guids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four min:1 Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min-ids.gy</argument>
 		</request>
 	</test>
 
