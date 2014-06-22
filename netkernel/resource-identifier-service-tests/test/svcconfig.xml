@@ -22,4 +22,12 @@
 			<uri>http://ns.overstory.co.uk/namespaces/resources/meta/id</uri>
 		</namespaceBinding>
 	</namespaceBindings>
+
+	<test-rig>
+		<ml-admin-baseURI>http://localhost:5029/actions/</ml-admin-baseURI>
+		<ml-actions>
+			<clear-db>clear-db</clear-db>
+			<identifier-count>identifier-count</identifier-count>
+		</ml-actions>
+	</test-rig>
 </config>

@@ -1,0 +1,17 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+INKFRequestContext context = context
+
+mlAdminBaseUrl = context.source ("res:/svcconfig/string/test-rig/ml-admin-baseURI")
+countAction = context.source ("res:/svcconfig/string/test-rig/ml-actions/identifier-count")
+url = "${mlAdminBaseUrl}${countAction}"
+
+req = context.createRequest ("active:httpGet")
+req.addArgument ("url", url)
+req.addArgument ("config", "res:/config/http-config.xml")
+req.addArgumentByValue ("state", context.source("active:httpState/managed/test"))
+req.setRepresentationClass (Integer.class);
+
+context.createResponseFrom (context.issueRequestForResponse (req))
+
+

@@ -1,0 +1,20 @@
+import org.netkernel.client.http.representation.HttpClientResponseRepresentation
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+INKFRequestContext context = context
+
+mlAdminBaseUrl = context.source ("res:/svcconfig/string/test-rig/ml-admin-baseURI")
+clearAction = context.source ("res:/svcconfig/string/test-rig/ml-actions/clear-db")
+url = "${mlAdminBaseUrl}${clearAction}"
+
+req = context.createRequest ("active:httpDelete")
+req.addArgument ("url", url)
+req.addArgument ("config", "res:/config/http-config.xml")
+req.addArgumentByValue ("state", context.source("active:httpState/managed/test"))
+req.setRepresentationClass (HttpClientResponseRepresentation.class);
+
+HttpClientResponseRepresentation hcrr = context.issueRequest (req) as HttpClientResponseRepresentation
+
+context.createResponseFrom (Boolean.valueOf (hcrr.getResponseCode() == 204))
+
+
