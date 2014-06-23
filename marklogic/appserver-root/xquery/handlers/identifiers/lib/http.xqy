@@ -110,8 +110,8 @@ declare private function get-body (
 ) as node()?
 {
     try {
-        let $xml := xdmp:get-request-body ($type)
-        let $node as node()? := ($xml/(element(), $xml/binary(), $xml/text()))[1]
+        let $body := xdmp:get-request-body ($type)
+        let $node as node()? := ($body/(element(), $body/binary(), $body/text()))[1]
         return
         if (fn:empty ($node) and $required)
         then re:throw-xml-error ('HTTP-EMPTYBODY', 400, "Empty body", empty-body ("Expected XML body is empty"))
