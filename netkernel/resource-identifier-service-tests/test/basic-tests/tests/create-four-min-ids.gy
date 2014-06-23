@@ -49,6 +49,7 @@ for (i = 0; i < 4; i++) {
 		.statusCode (200)
 		.header ("ETag", not (empty()))
 		.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
+		.body (not (hasXPath ("/i:identifier-info/i:annotation", namespaces)))
 	;
 }
 

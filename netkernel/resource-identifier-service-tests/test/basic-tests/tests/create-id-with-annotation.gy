@@ -1,0 +1,66 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import javax.xml.namespace.NamespaceContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+
+
+def random = Math.round (Math.random())
+def templateRoot = "random:${random}:"
+def idRoot = "urn:overstory.co.uk:id:"
+
+def annotation ="""
+<i:annotation xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
+   <foo:my-stuff xmlns:foo="the-foo-namespace">
+   	<foo:label>This is the label</foo:label>
+   </foo:my-stuff>
+</i:annotation>
+"""
+
+given()
+	.config (xmlconfig)
+	.queryParam ("template", "${templateRoot}{min:1}".toString ())
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.body (annotation)
+.when()
+	.post ("/identifier")
+.then()
+	.log().ifStatusCodeMatches (not(201))
+	.statusCode (201)
+	.body (equalTo (""))
+	.header ("Location", not (empty ()))
+	.header ("Location", startsWith ("/identifier/id/${idRoot}${templateRoot}"))
+	.header ("X-URI", not (empty ()))
+	.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+	.header ("ETag", not (empty()))
+;
+
+def String uri = "${idRoot}${templateRoot}0"
+
+given()
+	.config (xmlconfig)
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.header ("ETag", not (empty()))
+	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
+	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
+	.body (hasXPath ("/i:identifier-info/i:annotation/foo:my-stuff/foo:label", namespaces, equalTo ("This is the label")))
+;
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 1)
+
+context.createResponseFrom (true)
+

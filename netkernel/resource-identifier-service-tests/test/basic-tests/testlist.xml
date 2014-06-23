@@ -35,17 +35,24 @@
 
 	<!-- ===================================================================== -->
 
-	<test name="Create three GUID Identifiers">
+	<test name="Create three empty GUID Identifiers">
 		<request>
 			<identifier>active:RESTAssured</identifier>
 			<argument name="operator">res:/test/basic-tests/tests/create-three-guids.gy</argument>
 		</request>
 	</test>
 
-	<test name="Create four min:1 Identifiers">
+	<test name="Create four empty min:1 Identifiers">
 		<request>
 			<identifier>active:RESTAssured</identifier>
 			<argument name="operator">res:/test/basic-tests/tests/create-four-min-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create ID with annotation">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-id-with-annotation.gy</argument>
 		</request>
 	</test>
 

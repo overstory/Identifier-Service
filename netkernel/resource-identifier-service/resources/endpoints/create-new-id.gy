@@ -10,7 +10,7 @@ try {
 	INKFRequestContext context = context
 
 	String template = (context.exists ("arg:template")) ? context.source ("arg:template") : 'resource-{guid}'
-	String body = (context.exists ("arg:body")) ? context.source ("arg:body") : ''
+	String body = (context.exists ("arg:body")) ? context.source ("arg:body", String.class) : ''
 	String mimetype = context.source ("arg:mimetype")
 
 	req = context.createRequest ("active:httpAsyncPost")
