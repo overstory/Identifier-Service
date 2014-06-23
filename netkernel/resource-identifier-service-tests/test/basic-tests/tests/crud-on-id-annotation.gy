@@ -1,0 +1,115 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import javax.xml.namespace.NamespaceContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+
+
+def random = Math.round (Math.random())
+def templateRoot = "random:${random}:"
+def idRoot = "urn:overstory.co.uk:id:"
+
+def annotation ="""
+<i:annotation xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
+   <foo:my-stuff xmlns:foo="the-foo-namespace">
+   	<foo:label>This is the label</foo:label>
+   </foo:my-stuff>
+</i:annotation>
+"""
+
+def annotation2 ="""
+<i:annotation xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
+   <foo:some-other-stuff xmlns:foo="the-foo-namespace">
+   	<foo:blarg>I have been changed</foo:blarg>
+   </foo:some-other-stuff>
+</i:annotation>
+"""
+
+// Create an ID with an annotation
+given()
+	.config (xmlconfig)
+	.queryParam ("template", "${templateRoot}{min:1}".toString ())
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.body (annotation)
+.when()
+	.post ("/identifier")
+.then()
+	.log().ifStatusCodeMatches (not(201))
+	.statusCode (201)
+	.body (equalTo (""))
+	.header ("Location", not (empty ()))
+	.header ("Location", startsWith ("/identifier/id/${idRoot}${templateRoot}"))
+	.header ("X-URI", not (empty ()))
+	.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+	.header ("ETag", not (empty()))
+;
+
+def String uri = "${idRoot}${templateRoot}0"
+
+// Validate that the id was created with the correct annotation
+given()
+	.config (xmlconfig)
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.header ("ETag", not (empty()))
+	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
+	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
+	.body (hasXPath ("/i:identifier-info/i:annotation/foo:my-stuff/foo:label", namespaces, equalTo ("This is the label")))
+;
+
+// Validate that update is not allowed without an ETag
+given()
+	.config (xmlconfig)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.body (annotation2)
+.when()
+	.put ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(409))
+	.statusCode (409)
+	.body (not (equalTo ("")))
+	.body (hasXPath ("/e:errors/e:etag-mismatch/e:message", namespaces, startsWith ("ETag value must be provided on mutation request")))
+;
+
+// Get the current ID resource, store the ETag header value
+String etag =
+	given()
+	.config (xmlconfig)
+	.header ("Accept", "application/vnd.overstory.meta.id+xml")
+	.get ("/identifier/id/${uri}")
+	.header ("ETag");
+;
+
+// Try the update is with the ETag
+given()
+	.config (xmlconfig)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.header ("ETag", etag)
+	.body (annotation2)
+.when()
+	.put ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(204))
+	.statusCode (204)
+	.header ("ETag", not (empty()))
+	.body (equalTo (""))
+;
+
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 1)
+
+context.createResponseFrom (true)
+

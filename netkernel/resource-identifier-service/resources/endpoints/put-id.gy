@@ -12,17 +12,18 @@ try {
   String etag = ctx.source ("arg:etag")
   String mimetype = ctx.source ("arg:mimetype")
 
+  StringBuilder sb = new StringBuilder("<hds>")
+  if (mimetype != null) sb.append ("<Content-Type>").append (mimetype).append ("</Content-Type>")
+  if (etag != null) sb.append ("<ETag>").append (etag).append ("</ETag>")
+  sb.append ("</hds>")
+
   req = ctx.createRequest ("active:httpAsyncPut")
   req.addArgument ("url", ctx.source ("active:ml/fullurl/identifier/id/${id}", String.class))
   req.addArgument ("config", "res:/resources/http-call/http-config.xml")
   req.addArgumentByValue ("state", context.source("active:httpState/managed"))
   req.addArgument ("body", "arg:body")
   req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
-  if (mimetype != null) req.addArgumentByValue ("headers",
-          """<hds>
-              <Content-Type>${mimetype}</Content-Type>
-              <ETag>${etag}</ETag>
-            </hds>""".toString())
+  req.addArgumentByValue ("headers", sb.toString())
   req.setRepresentationClass (HttpClientResponseRepresentation.class);
 
   //Issue the request asynchronously and release this thread back to do work
