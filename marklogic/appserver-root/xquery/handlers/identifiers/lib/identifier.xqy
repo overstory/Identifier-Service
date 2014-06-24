@@ -21,6 +21,8 @@ declare variable $default-content-type as xs:string := "application/xml";
 
 declare variable $collection-identifier as xs:string := $const:ID-COLLECTION-NAME;
 
+declare variable $urn-invalid-regex := '([^\-.:_\da-zA-Z])';
+
 (: ------------------------------------------------------ :)
 
 (:
@@ -243,15 +245,18 @@ declare function process-analyze-string-result (
     $level as xs:int
 ) as xs:string
 {
-
 	let $result-sequence :=
 		for $child in $result/child::*
 		return (
-			if (fn:name ($child) = 's:non-match')
-			then fn:string ($child)
-			else if (fn:name ($child) = 's:match')
-			then process-match ($child, $level)
-			else ()
+			typeswitch ($child)
+			case element(s:non-match) return
+				if (fn:matches ($child/fn:string(), $urn-invalid-regex))
+				then fn:error (xs:QName ("lib:bad-template-char"), "Invalid char sequence detected in template: " || fn:string ($child))
+				else fn:string ($child)
+			case element(s:match) return
+				process-match ($child, $level)
+			default return
+				fn:error (xs:QName ("lib:analyze-fail"), "Unexpected child from analyse string: " || xdmp:describe ($child))
 		)
 
 	return full-identifier-uri (fn:string-join ($result-sequence, ''))
@@ -290,12 +295,12 @@ declare function process-match-string (
     then process-guid-template ($match)
     else if ($match = 'now')
     then process-now-template ($level)  (: FixMe, need to append level and type as a string :)
-    else if (fn:starts-with ($match, 'doi:'))
-    then process-doi-template ($match)
+    else if (fn:starts-with ($match, 'time'))
+    then process-time-template ($match, $level)
+    else if (fn:starts-with ($match, 'doi'))
+    then process-doi-template ($match, $level)
     else if (fn:starts-with ($match, 'id:'))
     then process-id-template ($match)
-    else if (fn:starts-with ($match, 'time:'))
-    then process-time-template ($match, $level)
     else if (fn:starts-with($match, 'file:'))
     then process-file-template ($match)
     else if (fn:starts-with ($match, 'min'))
@@ -315,10 +320,16 @@ declare function process-guid-template (
 };
 
 declare function process-doi-template (
-	$match as xs:string
-)
+	$match as xs:string,
+	$level as xs:int
+) as xs:string?
 {
-	fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'doi:'), '/', '_')
+	let $doi := string-arg ($match)
+	let $scrubbed := if (fn:exists ($doi)) then fn:replace ($doi, $urn-invalid-regex, '_') else ()
+	return
+	if (fn:exists ($scrubbed))
+	then append-level-number-gt-zero ($scrubbed, $level)
+	else fn:error (xs:QName ("lib:missing-doi"), "No valid DOI found as argument to {doi: <doi>}")
 };
 
 declare function process-id-template (
@@ -376,6 +387,22 @@ declare function numeric-arg (
 	let $default-length := 0
 	let $tokens := fn:tokenize ($template, " *: *")
 	return if ((fn:count ($tokens) = 1) or fn:not ($tokens[2] castable as xs:int)) then $default-length else xs:int($tokens[2])
+};
+
+declare function string-arg (
+	$template as xs:string
+) as xs:string?
+{
+	let $arg := fn:substring-after ($template, ":")
+	return if (fn:exists ($arg)) then functx:trim ($arg) else ()
+};
+
+declare function append-level-number-gt-zero (
+	$string as xs:string,
+	$level as xs:int
+) as xs:string
+{
+	if ($level = 0) then $string else $string || "-" || $level
 };
 
 (: ------------------------------------------------------ :)

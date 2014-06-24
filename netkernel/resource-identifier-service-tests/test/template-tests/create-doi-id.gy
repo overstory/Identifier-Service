@@ -1,0 +1,43 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+
+def fakeDoi = '10.1234/567-$/[aBc]:dkl(17)*47~xyz'
+
+def resultDois = [ '10.1234_567-___aBc_:dkl_17__47_xyz', '10.1234_567-___aBc_:dkl_17__47_xyz-1' ]
+
+for (i = 0; i < resultDois.size(); i++) {
+	uri = "urn:overstory.co.uk:id:doi:${resultDois[i]}".toString()
+
+	given()
+		.config (xmlconfig)
+		.queryParam ("template", "doi:{doi: ${fakeDoi}}".toString())
+		.contentType ("application/vnd.overstory.meta.id+xml")
+		.body ("")
+	.when()
+		.post ("/identifier")
+	.then()
+		.log().ifStatusCodeMatches (not(201))
+		.statusCode (201)
+		.body (equalTo (""))
+		.header ("Location", not (empty ()))
+		.header ("Location", equalTo ("/identifier/id/${uri}".toString()))
+		.header ("X-URI", not (empty ()))
+		.header ("X-URI", equalTo (uri))
+		.header ("ETag", not (empty()))
+	;
+}
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == resultDois.size())
+
+context.createResponseFrom (true)
+

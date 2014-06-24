@@ -57,6 +57,13 @@
 		</request>
 	</test>
 
+	<!-- ToDo: Need to test mal-formed DOIs and error responses -->
+	<test name="Create DOI Identifier">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/template-tests/create-doi-id.gy</argument>
+		</request>
+	</test>
 
 	<test name="Create ID with annotation">
 		<request>
