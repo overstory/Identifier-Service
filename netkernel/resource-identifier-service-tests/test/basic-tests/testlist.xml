@@ -42,10 +42,24 @@
 		</request>
 	</test>
 
+	<test name="Create four empty min (default) Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min-default-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four empty min:0 Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min0-ids.gy</argument>
+		</request>
+	</test>
+
 	<test name="Create four empty min:1 Identifiers">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/basic-tests/tests/create-four-min-ids.gy</argument>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min1-ids.gy</argument>
 		</request>
 	</test>
 

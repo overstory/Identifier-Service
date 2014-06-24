@@ -244,18 +244,17 @@ declare function process-analyze-string-result (
 ) as xs:string
 {
 
-    let $result-sequence :=
-        for $child in $result/child::*
-        return
-        (
-            if (fn:name($child) = 's:non-match')
-            then process-non-match ($child)
-            else if (fn:name ($child) = 's:match')
-            then process-match ($child, $level)
-            else ()
-        )
+	let $result-sequence :=
+		for $child in $result/child::*
+		return (
+			if (fn:name ($child) = 's:non-match')
+			then fn:string ($child)
+			else if (fn:name ($child) = 's:match')
+			then process-match ($child, $level)
+			else ()
+		)
 
-        return full-identifier-uri (concat-analyze-string-result ($result-sequence))
+	return full-identifier-uri (fn:string-join ($result-sequence, ''))
 
 };
 
@@ -266,19 +265,6 @@ declare function full-identifier-uri (
     fn:concat ( $uri-prefix, $uri-suffix )
 };
 
-declare function concat-analyze-string-result (
-    $result-sequence  (: todo: ask ron how to represent this 'as xs:sequence':)
-) as xs:string
-{
-    fn:string-join($result-sequence,'')
-};
-
-declare function process-non-match (
-    $non-match as element (s:non-match)
-) as xs:string
-{
-    $non-match/string()
-};
 
 declare function process-match (
     $match as element (s:match),
@@ -301,22 +287,20 @@ declare function process-match-string (
 )
 {
     if ( $match = 'guid' )
-    then ( generate-uuid-v4() )
+    then generate-uuid-v4()
     else if ( $match = 'now' )
-    (: clean the dateTime :)
-    then ( current-dateTime-as-utc() )
+    then current-dateTime-as-utc()  (: FixMe, need to append level and type as a string :)
     else if ( fn:starts-with ($match, 'doi:') )
-    then ( process-doi-template ($match) )
+    then process-doi-template ($match)
     else if ( fn:starts-with ($match, 'id:') )
-    then ( process-id-template ($match) )
+    then process-id-template ($match)
     else if ( fn:starts-with ($match, 'time:') )
-    then ( process-time-template ($match) )
+    then process-time-template ($match)
     else if ( fn:starts-with($match, 'file:') )
-    then ( process-file-template ($match) )
+    then process-file-template ($match)
     else if ( fn:starts-with ($match, 'min') )
-    then ( process-min-template ($match, $level) )
-    else
-    ( 'NOT-AVAILABLE')
+    then process-min-template ($match, $level)
+    else 'NOT-AVAILABLE'
 };
 
 declare function process-doi-template (
@@ -352,12 +336,14 @@ declare function process-file-template (
 declare function process-min-template (
     $match as xs:string,
     $level as xs:int
-)
+) as xs:string
 {
-	let $default-length := 4
-	let $tokens := fn:tokenize ($match, ": *")
+	let $default-length := 0
+	let $tokens := fn:tokenize ($match, " *: *")
 	let $length := if ((fn:count ($tokens) = 1) or fn:not ($tokens[2] castable as xs:int)) then $default-length else xs:int($tokens[2])
-	return functx:pad-integer-to-length ($level, $length)
+	let $empty := ($length = 0) and ($level = 0)
+	let $length := fn:max ((1, $length))
+	return if ($empty) then "" else fn:string (functx:pad-integer-to-length ($level, $length))
 };
 
 (: ------------------------------------------------------ :)

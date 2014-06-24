@@ -1,0 +1,61 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import javax.xml.namespace.NamespaceContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+
+def random = System.currentTimeMillis()
+def templateRoot = "random:${random}:"
+def idRoot = "urn:overstory.co.uk:id:"
+
+for (i = 0; i < 4; i++) {
+	given()
+		.config (xmlconfig)
+		.queryParam ("template", "${templateRoot}{min}".toString ())
+		.body ("")
+	.when()
+		.post ("/identifier")
+	.then()
+		.log().ifStatusCodeMatches (not(201))
+		.statusCode (201)
+		.body (equalTo (""))
+		.header ("Location", not (empty ()))
+		.header ("Location", startsWith ("/identifier/id/${idRoot}${templateRoot}"))
+		.header ("X-URI", not (empty ()))
+		.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+		.header ("ETag", not (empty()))
+	;
+}
+
+suffixes = [ '', '1', '2', '3']
+
+for (i = 0; i < 4; i++) {
+	def String uri = "${idRoot}${templateRoot}${suffixes[i]}"
+
+	given()
+		.config (xmlconfig)
+	.when()
+		.get ("/identifier/id/${uri}")
+	.then()
+		.log().ifStatusCodeMatches (not(200))
+		.statusCode (200)
+		.header ("ETag", not (empty()))
+		.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
+		.body (not (hasXPath ("/i:identifier-info/i:annotation", namespaces)))
+	;
+}
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 4)
+
+context.createResponseFrom (true)
+
