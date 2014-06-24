@@ -33,6 +33,13 @@
 		</request>
 	</test>
 
+	<test name="CRUD on id annotation">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/crud-on-id-annotation.gy</argument>
+		</request>
+	</test>
+
 	<!-- ===================================================================== -->
 
 	<test name="Reset REST Assured Static State">
