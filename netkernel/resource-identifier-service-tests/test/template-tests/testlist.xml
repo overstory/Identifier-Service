@@ -8,6 +8,13 @@
 		</request>
 	</test>
 
+	<test name="Create length limited GUID Identifier">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/template-tests/create-length-limited-guid.gy</argument>
+		</request>
+	</test>
+
 	<test name="Create four empty min (default) Identifiers">
 		<request>
 			<identifier>active:RESTAssured</identifier>

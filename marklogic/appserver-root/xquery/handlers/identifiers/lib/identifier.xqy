@@ -175,7 +175,7 @@ declare private function new-identifier-info (
 declare function generate-default-uri (
 ) as xs:string
 {
-    fn:concat ($uri-prefix, "resource:", generate-uuid-v4())
+	fn:concat ($uri-prefix, "resource:", generate-uuid-v4())
 };
 
 (: check if identifier-uri exists :)
@@ -189,10 +189,10 @@ declare function identifier-exists (
 
 (: add directory path to identifier-uri :)
 declare function full-identifier-ml-uri (
-$identifier as xs:string
+	$identifier as xs:string
 ) as xs:string
 {
-    fn:concat ($identifier-directory-prefix, $identifier, ".xml")
+	fn:concat ($identifier-directory-prefix, $identifier, ".xml")
 };
 
 
@@ -286,8 +286,8 @@ declare function process-match-string (
     $level as xs:int
 )
 {
-    if ($match = 'guid')
-    then generate-uuid-v4()
+    if (fn:starts-with ($match, 'guid'))
+    then process-guid-template ($match)
     else if ($match = 'now')
     then process-now-template ($level)  (: FixMe, need to append level and type as a string :)
     else if (fn:starts-with ($match, 'doi:'))
@@ -303,62 +303,80 @@ declare function process-match-string (
     else 'UNRECOGNIZED-TEMPLATE-NAME'
 };
 
+
+
+declare function process-guid-template (
+	$match as xs:string
+) as xs:string
+{
+	let $guid := generate-uuid-v4()
+	let $length := numeric-arg ($match)
+	return if ($length = 0) then $guid else fn:substring ($guid, 1, $length)
+};
+
 declare function process-doi-template (
-    $match as xs:string
+	$match as xs:string
 )
 {
-    fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'doi:'), '/', '_')
+	fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'doi:'), '/', '_')
 };
 
 declare function process-id-template (
-    $match as xs:string
+	$match as xs:string
 )
 {
-    fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'id:'), '/', '_')
+	fn:replace(fn:substring-after (fn:replace($match, ' ', ''), 'id:'), '/', '_')
 };
 
 declare function process-time-template (
-    $match as xs:string,
-    $level as xs:int
+	$match as xs:string,
+	$level as xs:int
 ) as xs:string
 {
-    let $time := fn:substring-after (fn:replace($match, ' ', ''), 'time:')
-    let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
-    return fn:concat ($time, $suffix)
+	let $time := fn:substring-after (fn:replace($match, ' ', ''), 'time:')
+	let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
+	return fn:concat ($time, $suffix)
 };
 
 declare function process-now-template (
-    $level as xs:int
+	$level as xs:int
 ) as xs:string
 {
-    let $time := fn:string (current-dateTime-as-utc())
-    let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
-    return fn:concat ($time, $suffix)
+	let $time := fn:string (current-dateTime-as-utc())
+	let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
+	return fn:concat ($time, $suffix)
 };
 
 declare function process-file-template (
-    $match as xs:string
+	$match as xs:string
 )
 {
-    if (fn:contains($match, '/'))
-    then (functx:substring-after-last($match, '/'))
-    else (functx:substring-after-last($match, '\'))
+	if (fn:contains($match, '/'))
+	then (functx:substring-after-last($match, '/'))
+	else (functx:substring-after-last($match, '\'))
 };
 
 declare function process-min-template (
-    $match as xs:string,
-    $level as xs:int
+	$match as xs:string,
+	$level as xs:int
 ) as xs:string
 {
-	let $default-length := 0
-	let $tokens := fn:tokenize ($match, " *: *")
-	let $length := if ((fn:count ($tokens) = 1) or fn:not ($tokens[2] castable as xs:int)) then $default-length else xs:int($tokens[2])
+	let $length := numeric-arg ($match)
 	let $empty := ($length = 0) and ($level = 0)
 	let $length := fn:max ((1, $length))
 	return if ($empty) then "" else fn:string (functx:pad-integer-to-length ($level, $length))
 };
 
 (: ------------------------------------------------------ :)
+
+declare function numeric-arg (
+	$template as xs:string
+) as xs:int
+{
+	let $default-length := 0
+	let $tokens := fn:tokenize ($template, " *: *")
+	return if ((fn:count ($tokens) = 1) or fn:not ($tokens[2] castable as xs:int)) then $default-length else xs:int($tokens[2])
+};
 
 (: ------------------------------------------------------ :)
 
@@ -368,26 +386,24 @@ declare function process-min-template (
 declare function generate-uuid-v4 (
 ) as xs:string
 {
-    let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
-    return
-    string-join
-    (
-        (
-        fn:substring ($x, 1, 8), fn:substring ($x, 9, 4),
-        fn:substring ($x, 13, 4), fn:substring ($x, 17, 4), fn:substring ($x, 21, 14)
-        ),
-        '-'
-    )
-
+	let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
+	return
+	string-join
+	(
+		(
+		fn:substring ($x, 1, 8), fn:substring ($x, 9, 4),
+		fn:substring ($x, 13, 4), fn:substring ($x, 17, 4), fn:substring ($x, 21, 14)
+		),
+		'-'
+	)
 };
 
 (: Generate Etag :)
 declare function generate-etag (
 ) as xs:string
 {
-    let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
-    return fn:substring ($x, 1, 18)
-
+	let $x := fn:concat (xdmp:integer-to-hex(xdmp:random()), xdmp:integer-to-hex(xdmp:random()))
+	return fn:substring ($x, 1, 18)
 };
 
 (: ------------------------------------------------------ :)
@@ -395,7 +411,7 @@ declare function generate-etag (
 declare function current-time (
 ) as xs:string
 {
-    fn:substring-before(fn:string(fn:current-dateTime()), '+')
+	fn:substring-before(fn:string(fn:current-dateTime()), '+')
 };
 
 declare function dateTime-as-utc (
@@ -419,43 +435,41 @@ declare function current-dateTime-as-utc (
 
 (: generate identifier's system information :)
 declare function identifier-system-info (
-$etag as xs:string
+	$etag as xs:string
 ) as element(i:system)
 {
-    <i:system xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">
-        <i:created>{current-dateTime-as-utc()}</i:created>
-        <i:etag>{$etag}</i:etag>
-    </i:system>
+	<i:system xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">
+		<i:created>{current-dateTime-as-utc()}</i:created>
+		<i:etag>{$etag}</i:etag>
+	</i:system>
 };
 
 (: identifier xml :)
 declare function identifier-info (
-    $id-system-info (:as element(i:system)?:),
-    $annotations (:as element(i:annotation)?:)
+	$id-system-info (:as element(i:system)?:),
+	$annotations (:as element(i:annotation)?:)
 ) as element(i:identifier-info)
 {
-    <i:identifier-info xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">
-    {
-    $id-system-info,
-    $annotations
-    }
-    </i:identifier-info>
+	<i:identifier-info xmlns:i="http://ns.overstory.co.uk/namespaces/meta/id">{
+		$id-system-info,
+		$annotations
+	}</i:identifier-info>
 };
 
 (: check incoming identifier annotation xml :)
 declare function check-identifier-annotation(
-    $annotation as element()
+	$annotation as element()
 ) as xs:boolean
 {
-    fn:name($annotation) = 'i:annotation'
+	fn:name($annotation) = 'i:annotation'
 };
 
 (: get identifier's etag from system info :)
 declare function etag-for-identifier (
-$doc as element()
+	$doc as element()
 ) as xs:string
 {
-    $doc/i:system/i:etag/string()
+	$doc/i:system/i:etag/string()
 };
 
 
