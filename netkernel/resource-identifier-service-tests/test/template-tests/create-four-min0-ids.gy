@@ -17,11 +17,14 @@ NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context",
 def random = System.currentTimeMillis()
 def templateRoot = "random:${random}:"
 def idRoot = "urn:overstory.co.uk:id:"
+def suffixes = [ '', '1', '2', '3' ]
 
 for (i = 0; i < 4; i++) {
+	def String uri = "${idRoot}${templateRoot}${suffixes[i]}"
+
 	given()
 		.config (xmlconfig)
-		.queryParam ("template", "${templateRoot}{min:0}".toString ())
+		.queryParam ("template", "${templateRoot}{min:0}".toString())
 		.body ("")
 	.when()
 		.post ("/identifier")
@@ -29,15 +32,13 @@ for (i = 0; i < 4; i++) {
 		.log().ifStatusCodeMatches (not(201))
 		.statusCode (201)
 		.body (equalTo (""))
-		.header ("Location", not (empty ()))
-		.header ("Location", startsWith ("/identifier/id/${idRoot}${templateRoot}"))
+		.header ("Location", not (empty()))
+		.header ("Location", equalTo ("/identifier/id/${uri}".toString()))
 		.header ("X-URI", not (empty ()))
-		.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+		.header ("X-URI", equalTo (uri))
 		.header ("ETag", not (empty()))
 	;
 }
-
-suffixes = [ '', '1', '2', '3']
 
 for (i = 0; i < 4; i++) {
 	def String uri = "${idRoot}${templateRoot}${suffixes[i]}"

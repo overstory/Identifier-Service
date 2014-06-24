@@ -29,6 +29,13 @@
 		</request>
 	</test>
 
+	<test name="Create four empty min:10 Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/template-tests/create-four-min10-ids.gy</argument>
+		</request>
+	</test>
+
 	<test name="Create four time Identifiers">
 		<request>
 			<identifier>active:RESTAssured</identifier>
