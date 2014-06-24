@@ -29,6 +29,21 @@
 		</request>
 	</test>
 
+	<test name="Create four time Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/template-tests/create-four-time-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four now Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/template-tests/create-four-now-ids.gy</argument>
+		</request>
+	</test>
+
+
 	<test name="Create ID with annotation">
 		<request>
 			<identifier>active:RESTAssured</identifier>

@@ -286,21 +286,21 @@ declare function process-match-string (
     $level as xs:int
 )
 {
-    if ( $match = 'guid' )
+    if ($match = 'guid')
     then generate-uuid-v4()
-    else if ( $match = 'now' )
-    then current-dateTime-as-utc()  (: FixMe, need to append level and type as a string :)
-    else if ( fn:starts-with ($match, 'doi:') )
+    else if ($match = 'now')
+    then process-now-template ($level)  (: FixMe, need to append level and type as a string :)
+    else if (fn:starts-with ($match, 'doi:'))
     then process-doi-template ($match)
-    else if ( fn:starts-with ($match, 'id:') )
+    else if (fn:starts-with ($match, 'id:'))
     then process-id-template ($match)
-    else if ( fn:starts-with ($match, 'time:') )
-    then process-time-template ($match)
-    else if ( fn:starts-with($match, 'file:') )
+    else if (fn:starts-with ($match, 'time:'))
+    then process-time-template ($match, $level)
+    else if (fn:starts-with($match, 'file:'))
     then process-file-template ($match)
-    else if ( fn:starts-with ($match, 'min') )
+    else if (fn:starts-with ($match, 'min'))
     then process-min-template ($match, $level)
-    else 'NOT-AVAILABLE'
+    else 'UNRECOGNIZED-TEMPLATE-NAME'
 };
 
 declare function process-doi-template (
@@ -318,10 +318,22 @@ declare function process-id-template (
 };
 
 declare function process-time-template (
-    $match as xs:string
-)
+    $match as xs:string,
+    $level as xs:int
+) as xs:string
 {
-    fn:substring-after (fn:replace($match, ' ', ''), 'time:')
+    let $time := fn:substring-after (fn:replace($match, ' ', ''), 'time:')
+    let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
+    return fn:concat ($time, $suffix)
+};
+
+declare function process-now-template (
+    $level as xs:int
+) as xs:string
+{
+    let $time := fn:string (current-dateTime-as-utc())
+    let $suffix := if ($level = 0) then "" else fn:concat ("-", $level)
+    return fn:concat ($time, $suffix)
 };
 
 declare function process-file-template (

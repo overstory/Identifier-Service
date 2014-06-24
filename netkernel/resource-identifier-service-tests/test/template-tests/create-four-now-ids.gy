@@ -1,0 +1,46 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state"))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+
+// FixMe: This test is kind of weak.  Really need to apply a regex against the generated URI,
+// and can't query back the created IDs without capturing the X-URI headers
+// Also a potential for random failures if two request occur within the same time tick (more likely on Windows).
+
+def template = "current-time:{now}".toString()
+def idRoot = "urn:overstory.co.uk:id:current-time:20"
+
+for (i = 0; i < 4; i++) {
+	given()
+		.config (xmlconfig)
+		.queryParam ("template", template)
+		.body ("")
+	.when()
+		.post ("/identifier")
+	.then()
+		.log().ifStatusCodeMatches (not(201))
+		.statusCode (201)
+		.body (equalTo (""))
+		.header ("Location", not (empty ()))
+		.header ("Location", startsWith ("/identifier/id/${idRoot}"))
+		.header ("Location", endsWith ("Z"))
+		.header ("X-URI", not (empty ()))
+		.header ("X-URI", startsWith (idRoot))
+		.header ("X-URI", endsWith ("Z"))
+		.header ("ETag", not (empty()))
+	;
+}
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 4)
+
+context.createResponseFrom (true)
+
