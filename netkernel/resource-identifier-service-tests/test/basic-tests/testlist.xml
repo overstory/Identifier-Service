@@ -15,28 +15,28 @@
 	<test name="GET of non-existent identifier resource">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/basic-tests/tests/get-non-exist.gy</argument>
+			<argument name="operator">res:/test/basic-tests/get-non-exist.gy</argument>
 		</request>
 	</test>
 
 	<test name="PUT of non-existent identifier resource">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/basic-tests/tests/put-non-exist.gy</argument>
+			<argument name="operator">res:/test/basic-tests/put-non-exist.gy</argument>
 		</request>
 	</test>
 
 	<test name="DELETE of non-existent identifier resource">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/basic-tests/tests/delete-non-exist.gy</argument>
+			<argument name="operator">res:/test/basic-tests/delete-non-exist.gy</argument>
 		</request>
 	</test>
 
 	<test name="CRUD on id annotation">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/basic-tests/tests/crud-on-id-annotation.gy</argument>
+			<argument name="operator">res:/test/basic-tests/crud-on-id-annotation.gy</argument>
 		</request>
 	</test>
 
