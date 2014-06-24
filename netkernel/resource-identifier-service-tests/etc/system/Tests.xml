@@ -1,9 +1,17 @@
 <tests>
-  <test>
-    <id>urn:test:uk:co:overstory:identifier:rest</id>
-    <name>Basic API Tests</name>
-    <desc>Basic Identifier Service API Tests</desc>
-    <uri>res:/test/basic-tests/testlist.xml</uri>
-    <icon></icon>
-  </test>
+	<test>
+		<id>urn:test:uk:co:overstory:identifier:rest</id>
+		<name>Basic API Tests</name>
+		<desc>Basic Identifier Service API Tests</desc>
+		<uri>res:/test/basic-tests/testlist.xml</uri>
+		<icon>res:/resources/doc/overstory-icon.png</icon>
+	</test>
+
+	<test>
+		<id>urn:test:uk:co:overstory:identifier:template</id>
+		<name>Template Tests</name>
+		<desc>Tests of identifier generation from templates</desc>
+		<uri>res:/test/template-tests/testlist.xml</uri>
+		<icon>res:/resources/doc/overstory-icon.png</icon>
+	</test>
 </tests>

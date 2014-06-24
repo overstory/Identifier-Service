@@ -1,0 +1,46 @@
+<testlist>
+	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
+
+	<test name="Create three empty GUID Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-three-guids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four empty min (default) Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min-default-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four empty min:0 Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min0-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create four empty min:1 Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-four-min1-ids.gy</argument>
+		</request>
+	</test>
+
+	<test name="Create ID with annotation">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/create-id-with-annotation.gy</argument>
+		</request>
+	</test>
+
+	<test name="CRUD on id annotation">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/tests/crud-on-id-annotation.gy</argument>
+		</request>
+	</test>
+
+</testlist>
