@@ -1,0 +1,57 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+import javax.xml.namespace.NamespaceContext
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+
+def prefix = 'urn:overstory.co.uk:id:resource:'
+
+// load up the DB with 25 identifiers
+for (i = 0; i < 25; i++) {
+	given()
+		.config (xmlconfig)
+		.body ("")
+	.when()
+		.post ("/identifier")
+	.then()
+		.log().ifStatusCodeMatches (not(201))
+		.statusCode (201)
+		.body (equalTo (""))
+		.header ("Location", startsWith ("/identifier/id/${prefix}".toString()))
+		.header ("X-URI", startsWith (prefix))
+		.header ("ETag", not (empty()))
+	;
+}
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 25)
+
+// Get the first part with default page settings
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/atom+xml")
+.when()
+	.get ("/identifier")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.body (not (empty()))
+//	.body (hasXPath ("/atom:feed/atom:link[@rel = 'self'][@href = '/identifier']", namespaces))
+//	.body (hasXPath ("/atom:feed/atom:link[@rel = 'next'][@href = '/identifier?page=2']", namespaces))
+	.body (hasXPath ("/atom:feed/i:total-hits", namespaces, equalTo ("25")))
+	.body (hasXPath ("/atom:feed/i:first-item", namespaces, equalTo ("1")))
+	.body (hasXPath ("/atom:feed/i:returned-count", namespaces, equalTo ("10")))
+	.body (hasXPath ("count(/atom:feed/atom:entry)", namespaces, equalTo ("10")))
+;
+
+context.createResponseFrom (true)
+
+

@@ -27,6 +27,11 @@ declare private variable $endpoints as element(rest:options) :=
 			<http method="GET"/>
 		</request>
 
+		<!-- Generate information about a resource identifier -->
+		<request uri="^/identifier(/)?$" endpoint="/xquery/handlers/identifiers/search.xqy" user-params="allow">
+			<http method="GET"/>
+		</request>
+
 		<!-- Update information about a resource identifier -->
 		<request uri="^/identifier/id/(.+)$" endpoint="/xquery/handlers/identifiers/put.xqy" user-params="deny">
 			<uri-param name="id">$1</uri-param>

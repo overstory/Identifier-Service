@@ -40,6 +40,13 @@
 		</request>
 	</test>
 
+	<test name="Simple pagination">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/simple-pagination.gy</argument>
+		</request>
+	</test>
+
 	<!-- ===================================================================== -->
 
 	<test name="Reset REST Assured Static State">

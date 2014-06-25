@@ -22,6 +22,10 @@
 			<uri>http://ns.overstory.co.uk/namespaces/resources/meta/id</uri>
 		</namespaceBinding>
 		<namespaceBinding>
+			<prefix>atom</prefix>
+			<uri>http://www.w3.org/2005/Atom</uri>
+		</namespaceBinding>
+		<namespaceBinding>
 			<prefix>foo</prefix>
 			<uri>the-foo-namespace</uri>
 		</namespaceBinding>

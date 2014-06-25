@@ -9,12 +9,12 @@ import org.netkernel.layer0.nkf.NKFException
 try {
 	INKFRequestContext context = context
 
-	String template = (context.exists ("arg:template")) ? context.source ("arg:template") : 'resource-{guid}'
+	String templateArg = (context.exists ("arg:template")) ? "?template=${context.source ("arg:template")}" : ''
 	String body = (context.exists ("arg:body")) ? context.source ("arg:body", String.class) : ''
 	String mimetype = context.source ("arg:mimetype")
 
 	req = context.createRequest ("active:httpAsyncPost")
-	req.addArgument ("url", context.source ("active:ml/fullurl/identifier?template=${template}", String.class))
+	req.addArgument ("url", context.source ("active:ml/fullurl/identifier${templateArg}", String.class))
 	req.addArgument ("config", "res:/resources/http-call/http-config.xml")
 	req.addArgumentByValue ("state", context.source ("active:httpState/managed"))
 	req.addArgumentByValue ("body", body)

@@ -1,5 +1,5 @@
 <config>
-=====================================================================
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -22,7 +22,32 @@
 			<argument name="mimetype">httpRequest:/header/Content-Type</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
+	<endpoint>
+		<meta>
+			<rest>
+				<simple>identifier</simple>
+				<method>GET</method>
+				<Etag>SHA1</Etag>
+				<compress/>
+			</rest>
+		</meta>
+		<grammar>
+			<active>
+				<identifier>active:idsvc/search-identifiers</identifier>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/resources/endpoints/search.gy</argument>
+			<argument name="mimetype">httpRequest:/header/Accept</argument>
+		</request>
+	</endpoint>
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -44,7 +69,9 @@
 			<argument name="id">arg:id</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -69,7 +96,9 @@
 			<argument name="body">httpRequest:/body</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -92,7 +121,9 @@
 			<argument name="etag">httpRequest:/header/ETag</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -115,7 +146,9 @@
 			<argument name="template">httpRequest:/param/template</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -137,7 +170,9 @@
 			<argument name="id">arg:id</argument>
 		</request>
 	</endpoint>
-=====================================================================
+
+	<!-- ===================================================================== -->
+
 	<endpoint>
 		<meta>
 			<rest>
@@ -159,7 +194,5 @@
 			<argument name="url">arg:url</argument>
 		</request>
 	</endpoint>
-
-=====================================================================
 
 </config>
