@@ -26,8 +26,7 @@ declare function perform-search (
 {
 	let $ipp as xs:integer := xs:integer ($criteria/ipp)
 	let $page as xs:integer := xs:integer ($criteria/page)
-	let $first-item as xs:integer := xs:integer ($criteria/first-item)
-	let $first as xs:integer := if ($first-item ne 0) then $first-item else ((($page - 1) * (xs:integer ($criteria/ipp))) + 1)
+	let $first as xs:integer := ((($page - 1) * (xs:integer ($criteria/ipp))) + 1)
 	let $last := ($first + $ipp) - 1
 	let $hit-count := xdmp:estimate (cts:search (fn:collection ($const:ID-COLLECTION-NAME), $query, $search-options))
 	let $results := cts:search (fn:collection ($const:ID-COLLECTION-NAME), $query, $search-options)[$first to $last]

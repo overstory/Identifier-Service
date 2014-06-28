@@ -13,14 +13,12 @@ declare variable $terms as xs:string? := xdmp:get-request-field ("terms", ());
 
 declare variable $ipp as xs:string? := xdmp:get-request-field ("ipp", "10");
 declare variable $page as xs:string? := xdmp:get-request-field ("page", "1");
-declare variable $first-item as xs:string? := xdmp:get-request-field ("first-item", "0");
 
 declare variable $search-criteria :=
 	<search-criteria>
 		<terms>{ $terms }</terms>
 		<ipp>{ $ipp }</ipp>
 		<page>{ $page }</page>
-		<first-item>{ $first-item }</first-item>
 	</search-criteria>;
 
 (: --------------------------------------------------- :)
