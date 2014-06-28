@@ -43,6 +43,8 @@
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/endpoints/search.gy</argument>
 			<argument name="mimetype">httpRequest:/header/Accept</argument>
+			<argument name="url">httpRequest:/url</argument>
+			<argument name="queryString">httpRequest:/query</argument>
 		</request>
 	</endpoint>
 
@@ -194,5 +196,9 @@
 			<argument name="url">arg:url</argument>
 		</request>
 	</endpoint>
+
+	<!-- ===================================================================== -->
+	<!-- ===================================================================== -->
+
 
 </config>
