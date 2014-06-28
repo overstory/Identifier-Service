@@ -1,0 +1,58 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+import javax.xml.namespace.NamespaceContext
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
+
+RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+
+def uri = 'urn:overstory.co.uk:id:foo'
+
+// Create an entry in theDB
+given()
+	.config (xmlconfig)
+	.body ("")
+.when()
+	.post ("/identifier?template=foo")
+.then()
+	.log().ifStatusCodeMatches (not(201))
+	.statusCode (201)
+	.body (equalTo (""))
+	.header ("Location", equalTo ("/identifier/id/${uri}".toString()))
+	.header ("X-URI", equalTo (uri))
+	.header ("ETag", not (empty()))
+;
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 1)
+
+// Get the search results, containing one item
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/atom+xml")
+.when()
+	.get ("/identifier")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.body (not (empty()))
+	.body (hasXPath ("/atom:feed/atom:link[@rel = 'self']/@href", namespaces, endsWith ('/identifier?page=1&ipp=10')))
+	.body (hasXPath ("/atom:feed/atom:link[@rel = 'next']/@href", namespaces, isEmptyOrNullString()))
+	.body (hasXPath ("/atom:feed/atom:link[@rel = 'prev']/@href", namespaces, isEmptyOrNullString()))
+	.body (hasXPath ("/atom:feed/i:total-hits", namespaces, equalTo ("1")))
+	.body (hasXPath ("/atom:feed/i:returned-count", namespaces, equalTo ("1")))
+	.body (hasXPath ("count(/atom:feed/atom:entry)", namespaces, equalTo ("1")))
+	.body (hasXPath ("/atom:feed/atom:entry/atom:id", namespaces, equalTo (uri)))
+	.body (hasXPath ("/atom:feed/atom:entry/atom:link[@rel = 'self']/@href", namespaces, endsWith ("/identifier/id/${uri}")))
+	.body (hasXPath ("/atom:feed/atom:entry/atom:link[@rel = 'self']/@type", namespaces, equalTo ('application/vnd.overstory.meta.id+xml')))
+;
+
+context.createResponseFrom (true)
+
+

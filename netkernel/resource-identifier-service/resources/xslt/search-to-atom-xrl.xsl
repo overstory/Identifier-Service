@@ -7,6 +7,8 @@
 
 	<xsl:param name="url"/>
 
+	<xsl:variable name="url-root" select="replace ($url, 'http://([-a-zA-Z0-9]+)(:[0-9]+)', '')"/>
+
 	<xsl:template match="/search-results">
 		<xsl:variable name="page" as="xs:integer" select="xs:integer(search-criteria/page)"/>
 
@@ -34,8 +36,10 @@
 
 	<xsl:template match="uri">
 		<atom:entry>
+
 			<atom:id><xsl:value-of select="."/></atom:id>
-			<!-- ToDo: Links, etc here -->
+			<atom:link rel="self" href="{concat ($url-root, '/id/', string(.))}" type="application/vnd.overstory.meta.id+xml"/>
+
 			<atom:content type="application/vnd.overstory.meta.id+xml">
 				<xrl:include>
 					<xrl:identifier>active:idsvc/get-id</xrl:identifier>
@@ -89,10 +93,9 @@
 		<xsl:variable name="terms-param" as="xs:string?">
 			<xsl:if test="search-criteria/terms ne ''"><xsl:value-of select="concat ('terms=', search-criteria/terms)"/></xsl:if>
 		</xsl:variable>
-		<xsl:variable name="root" select="replace ($url, 'http://([-a-zA-Z0-9]+)(:[0-9]+)', '')"/>
 		<xsl:variable name="query-string" select="string-join (($page-param, $ipp-param, $terms-param), '&amp;')"/>
 
-		<xsl:value-of select="concat ($root, '?', $query-string)"/>
+		<xsl:value-of select="concat ($url-root, '?', $query-string)"/>
 	</xsl:template>
 
 

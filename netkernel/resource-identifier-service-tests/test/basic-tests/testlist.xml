@@ -47,6 +47,13 @@
 		</request>
 	</test>
 
+	<test name="Self link in Atom entry">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/self-link-in-entry.gy</argument>
+		</request>
+	</test>
+
 	<!-- ===================================================================== -->
 
 	<test name="Reset REST Assured Static State">
