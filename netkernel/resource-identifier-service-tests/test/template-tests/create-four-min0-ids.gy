@@ -33,7 +33,7 @@ for (i = 0; i < 4; i++) {
 		.statusCode (201)
 		.body (equalTo (""))
 		.header ("Location", not (empty()))
-		.header ("Location", equalTo ("/identifier/id/${uri}".toString()))
+		.header ("Location", endsWith ("/identifier/id/${uri}".toString()))
 		.header ("X-URI", not (empty ()))
 		.header ("X-URI", equalTo (uri))
 		.header ("ETag", not (empty()))

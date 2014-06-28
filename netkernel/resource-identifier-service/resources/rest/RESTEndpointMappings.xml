@@ -18,6 +18,7 @@
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/endpoints/create-new-id.gy</argument>
 			<argument name="template">httpRequest:/param/template</argument>
+			<argument name="url">httpRequest:/url</argument>
 			<argument name="body">httpRequest:/body</argument>
 			<argument name="mimetype">httpRequest:/header/Content-Type</argument>
 		</request>

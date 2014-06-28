@@ -25,7 +25,7 @@ given()
 	.log().ifStatusCodeMatches (not(201))
 	.statusCode (201)
 	.body (equalTo (""))
-	.header ("Location", equalTo ("/identifier/id/${uri}".toString()))
+	.header ("Location", containsString ("/identifier/id/${uri}".toString()))
 	.header ("X-URI", equalTo (uri))
 	.header ("ETag", not (empty()))
 ;

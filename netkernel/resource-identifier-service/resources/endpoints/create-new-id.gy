@@ -12,6 +12,9 @@ try {
 	String templateArg = (context.exists ("arg:template")) ? "?template=${context.source ("arg:template")}" : ''
 	String body = (context.exists ("arg:body")) ? context.source ("arg:body", String.class) : ''
 	String mimetype = context.source ("arg:mimetype")
+	String url = context.source ("arg:url")
+	String urlPath = url.replaceFirst ('http://([-a-zA-Z0-9]+)(:[0-9]+)', '')
+	String svcPrefix = urlPath.replaceFirst ('/identifier', '')
 
 	req = context.createRequest ("active:httpAsyncPost")
 	req.addArgument ("url", context.source ("active:ml/fullurl/identifier${templateArg}", String.class))
@@ -28,7 +31,7 @@ try {
 	handle = context.issueAsyncRequest (req)
 
 	//Finally set listener and return this thread
-	handle.setListener (new CompletedPostListener ())
+	handle.setListener (new CompletedPostListener (svcPrefix))
 	context.setNoResponse ()
 } catch (e) {
 	e.printStackTrace ()
@@ -37,16 +40,28 @@ try {
 
 class CompletedPostListener implements INKFAsyncRequestListener
 {
+	def String svcPrefix
+
+	CompletedPostListener (String svcPrefix)
+	{
+		this.svcPrefix = svcPrefix
+	}
+
 	def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
 	{
 		context.createResponseFrom (aException);
 	}
 
-	static def void copyHeaderToOuter (INKFResponse response, HttpClientResponseRepresentation hcrr, String headerName)
+	static def void copyHeaderToOuter (INKFResponse response, HttpClientResponseRepresentation hcrr, String headerName, String prefix)
 	{
 		String value = (hcrr.getHeader (headerName) == null) ? "" : hcrr.getHeader (headerName)
 
-		response.setHeader ("httpResponse:/header/${headerName}", value)
+		response.setHeader ("httpResponse:/header/${headerName}", "${prefix}${value}".toString())
+	}
+
+	static def void copyHeaderToOuter (INKFResponse response, HttpClientResponseRepresentation hcrr, String headerName)
+	{
+		copyHeaderToOuter (response, hcrr, headerName, "")
 	}
 
 	//Receive the client request's response and pass through the relevant pieces.
@@ -57,7 +72,7 @@ class CompletedPostListener implements INKFAsyncRequestListener
 
 		response.setMimeType (hcrr.getHeader ("Content-Type"))
 		response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
-		copyHeaderToOuter (response, hcrr, "Location")
+		copyHeaderToOuter (response, hcrr, "Location", svcPrefix)
 		copyHeaderToOuter (response, hcrr, "X-URI")
 		copyHeaderToOuter (response, hcrr, "ETag")
 		copyHeaderToOuter (response, hcrr, "Content-Type")

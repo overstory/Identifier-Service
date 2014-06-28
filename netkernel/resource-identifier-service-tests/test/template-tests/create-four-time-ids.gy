@@ -30,7 +30,7 @@ for (i = 0; i < 4; i++) {
 		.statusCode (201)
 		.body (equalTo (""))
 		.header ("Location", not (empty ()))
-		.header ("Location", startsWith ("/identifier/id/${idRoot}${fakeTime}"))
+		.header ("Location", containsString ("/identifier/id/${idRoot}${fakeTime}"))
 		.header ("X-URI", not (empty ()))
 		.header ("X-URI", startsWith ("${idRoot}${fakeTime}"))
 		.header ("ETag", not (empty()))

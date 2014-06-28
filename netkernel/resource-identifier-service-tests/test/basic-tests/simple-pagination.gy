@@ -26,7 +26,7 @@ for (i = 0; i < 25; i++) {
 		.log().ifStatusCodeMatches (not(201))
 		.statusCode (201)
 		.body (equalTo (""))
-		.header ("Location", startsWith ("/identifier/id/${prefix}".toString()))
+		.header ("Location", containsString ("/identifier/id/${prefix}".toString()))
 		.header ("X-URI", startsWith (prefix))
 		.header ("ETag", not (empty()))
 	;
