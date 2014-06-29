@@ -120,6 +120,7 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
 	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
 	.body (hasXPath ("/i:identifier-info/i:annotation/foo:some-other-stuff/foo:blarg", namespaces, equalTo ("I have been changed")))
+	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:replace-annotation ", namespaces))
 ;
 
 bogusEtag = '"jfnlanffdjfglsjdhgfdlsfnvlsdnlsrdlsjadnlfansflsfn"'
@@ -172,6 +173,7 @@ given()
 	.header ("ETag", not (empty()))
 	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
 	.body (not (hasXPath ("/i:identifier-info/i:annotation", namespaces)))
+	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:delete-annotation ", namespaces))
 ;
 
 // Get the current ID resource, save the ETag header value
@@ -210,6 +212,7 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
 	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
 	.body (hasXPath ("/i:identifier-info/i:annotation/foo:some-other-stuff/foo:blarg", namespaces, equalTo ("I have been changed")))
+	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:add-annotation ", namespaces))
 ;
 
 
