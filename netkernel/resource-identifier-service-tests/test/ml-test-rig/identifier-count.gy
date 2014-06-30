@@ -9,7 +9,7 @@ url = "${mlAdminBaseUrl}${countAction}"
 req = context.createRequest ("active:httpGet")
 req.addArgument ("url", url)
 req.addArgument ("config", "res:/config/http-config.xml")
-req.addArgumentByValue ("state", context.source("active:httpState/managed/test"))
+req.addArgumentByValue ("state", context.source("res:/httpState/managed/test-rig"))
 req.setRepresentationClass (Integer.class);
 
 context.createResponseFrom (context.issueRequestForResponse (req))

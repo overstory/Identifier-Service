@@ -18,8 +18,8 @@ try {
 
 	req = context.createRequest ("active:httpAsyncPost")
 	req.addArgument ("url", context.source ("active:ml/fullurl/identifier${templateArg}", String.class))
-	req.addArgument ("config", "res:/resources/http-call/http-config.xml")
-	req.addArgumentByValue ("state", context.source ("active:httpState/managed"))
+	req.addArgument ("config", "res:/config/http-config.xml")
+	req.addArgumentByValue ("state", context.source("res:/httpState/managed/idsvc"))
 	req.addArgumentByValue ("body", body)
 	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
 	if (mimetype != null) {

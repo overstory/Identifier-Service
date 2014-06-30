@@ -53,6 +53,9 @@
 			<uri>urn:org:netkernel:tpt:http</uri>
 		</import>
 
+		<fileset>
+			<regex>res:/config/.*</regex>
+		</fileset>
 		<!--ICON-->
 		<fileset>
 			<regex>res:/resources/doc/overstory-icon.png</regex>
@@ -100,7 +103,7 @@
 		</mapper>
 	</rootspace>
 
-	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="false" name="HTTP State manager">
+	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="true" name="HTTP State manager">
 		<mapper>
 			<config>res:/resources/http/HttpStateMappings.xml</config>
 			<space>

@@ -48,7 +48,7 @@
 		<request>
 			<identifier>active:xpath2</identifier>
 			<argument name="operator" method="as-string">string(/httpCredentials/[[arg:field]])</argument>
-			<argument name="operand">res:/resources/http-call/http-credentials.xml</argument>
+			<argument name="operand">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 

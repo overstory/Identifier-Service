@@ -14,8 +14,8 @@ try {
 
   req = ctx.createRequest ("active:httpAsyncGet")
   req.addArgument ("url", ctx.source ("active:ml/fullurl/identifier/id/${id}", String.class))
-  req.addArgument ("config", "res:/resources/http-call/http-config.xml")
-  req.addArgumentByValue ("state", context.source("active:httpState/managed"))
+  req.addArgument ("config", "res:/config/http-config.xml")
+  req.addArgumentByValue ("state", context.source("res:/httpState/managed/idsvc"))
   req.setHeader(INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
   req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id+xml</Accept></hds>")
   req.setRepresentationClass (HttpClientResponseRepresentation.class);
