@@ -59,7 +59,7 @@
 		</fileset>
 	</rootspace>
 
-	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:toolbox" public="false">
+	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:toolbox" public="false" name="Toolbox">
 		<import>
 			<uri>urn:org:netkernel:xml:core</uri>
 		</import>
@@ -100,7 +100,7 @@
 		</mapper>
 	</rootspace>
 
-	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="false">
+	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="false" name="HTTP State manager">
 		<mapper>
 			<config>res:/resources/http/HttpStateMappings.xml</config>
 			<space>
