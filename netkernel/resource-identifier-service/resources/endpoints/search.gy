@@ -4,68 +4,90 @@ import org.netkernel.layer0.nkf.*
 
 import org.netkernel.client.http.representation.HttpClientResponseRepresentation
 
+INKFRequestContext context = context
 
 try {
-	INKFRequestContext context = context
-
 	String url = context.source ("arg:url")
 	String queryString = (context.source ("arg:queryString") == null) ? "" : "?${context.source ('arg:queryString')}".toString()
+	String stateId = newHttpState (context)
 
 	req = context.createRequest ("active:httpAsyncGet")
 	req.addArgument ("url", context.source ("active:ml/fullurl/identifier${queryString}".toString(), String.class))
 	req.addArgument ("config", "res:/config/http-config.xml")
-	req.addArgumentByValue ("state", context.source("res:/httpState/managed/idsvc"))
+	req.addArgumentByValue ("state", stateId)
 	req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id.brief+xml</Accept></hds>")
 	req.setRepresentationClass (HttpClientResponseRepresentation.class);
 
 	//Issue the request asynchronously and release this thread back to do work
-	context.issueAsyncRequest(req).setListener(new CompletedListener (url, queryString))
+	context.issueAsyncRequest (req).setListener (new CompletedListener (url, queryString, stateId))
 	context.setNoResponse()
 } catch (e) {
 	e.printStackTrace()
 	throw e
 }
 
+def newHttpState (INKFRequestContext context)
+{
+	INKFRequest req = context.createRequest ("res:/httpState/managed/iopcs")
+
+	// Make sure this resource does not depend on the transient HTTP state
+	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
+
+	return context.issueRequest (req)
+}
+
 class CompletedListener implements INKFAsyncRequestListener
 {
-	def String url
-	def String queryString
+	String url
+	String queryString
+	String stateId
 
-	CompletedListener (String url, String queryString)
+	CompletedListener (String url, String queryString, stateId)
 	{
 		this.url = url
 		this.queryString = queryString
+		this.stateId = stateId
 	}
 
 	def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
 	{
+		context.delete (stateId)
 		context.createResponseFrom(aException);
 	}
 
 	//Receive the client request's response and pass through the relevant pieces.
 	def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext context)
 	{
+		context.delete (stateId)
 		HttpClientResponseRepresentation hcrr = resp.getRepresentation() as HttpClientResponseRepresentation
 
-		// ToDo: Need to check HTTP response code in hcrr and take error path if not 200
+		if (hcrr.getResponseCode() == 200) {
+			def req = context.createRequest ("active:xslt2")
+			req.addArgumentByValue ("operand", hcrr.getEntity())
+			req.addArgument ("operator", "res:/resources/xslt/search-to-atom-xrl.xsl")
+			req.addArgumentByValue ("url", url)
+			req.addArgumentByValue ("queryString", queryString)
+			def rep = context.issueRequest(req)
 
-		def req = context.createRequest ("active:xslt2")
-		req.addArgumentByValue ("operand", hcrr.getEntity())
-		req.addArgument ("operator", "res:/resources/xslt/search-to-atom-xrl.xsl")
-		req.addArgumentByValue ("url", url)
-		req.addArgumentByValue ("queryString", queryString)
-		def rep = context.issueRequest(req)
+			req = context.createRequest ("active:xrl2")
+			req.addArgumentByValue ("template", rep)
+			rep = context.issueRequest(req)
 
-		req = context.createRequest ("active:xrl2")
-		req.addArgumentByValue ("template", rep)
-		rep = context.issueRequest(req)
-
-		def responseOuter = context.createResponseFrom (rep)
-		responseOuter.setMimeType (hcrr.getHeader ("content-type"))
-		//responseOuter.setMimeType ("text/xml")
-		responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
-		responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader("content-type"))
-		responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+			def responseOuter = context.createResponseFrom (rep)
+			responseOuter.setMimeType (hcrr.getHeader ("content-type"))
+			//responseOuter.setMimeType ("text/xml")
+			responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+			responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader("content-type"))
+			responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+		} else {
+			response = context.createResponseFrom (hcrr.getEntity())
+			response.setMimeType (hcrr.getHeader ("content-type"))
+			response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+			response.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader ("content-type"))
+			response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+			response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+			response.setHeader ("httpResponse:/header/Server", "")
+		}
 	}
 }
 
