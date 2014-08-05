@@ -1,12 +1,11 @@
 <config>
 		<endpoint>
 		<grammar>
-			<simple>res:/httpState/managed/{name:(.+)?}</simple>
+			<simple>res:/httpState/newState</simple>
 		</grammar>
 		<request>
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/http/state-manager.gy</argument>
-			<argument name="name" method="as-string">arg:name</argument>
 		</request>
 	</endpoint>
 </config>

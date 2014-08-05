@@ -35,7 +35,7 @@ try {
 
 def newHttpState (INKFRequestContext context)
 {
-	INKFRequest req = context.createRequest ("res:/httpState/managed/iopcs")
+	INKFRequest req = context.createRequest ("res:/httpState/newState")
 
 	// Make sure this resource does not depend on the transient HTTP state
 	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);

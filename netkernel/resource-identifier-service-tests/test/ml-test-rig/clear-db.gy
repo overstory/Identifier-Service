@@ -10,7 +10,7 @@ url = "${mlAdminBaseUrl}${clearAction}"
 req = context.createRequest ("active:httpDelete")
 req.addArgument ("url", url)
 req.addArgument ("config", "res:/config/http-config.xml")
-req.addArgumentByValue ("state", context.source("res:/httpState/managed/test-rig"))
+req.addArgumentByValue ("state", context.source("res:/httpState/newState"))
 req.setRepresentationClass (HttpClientResponseRepresentation.class);
 
 HttpClientResponseRepresentation hcrr = context.issueRequest (req) as HttpClientResponseRepresentation
