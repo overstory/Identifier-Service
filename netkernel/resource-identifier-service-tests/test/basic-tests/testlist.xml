@@ -1,15 +1,6 @@
 <testlist>
 	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
 
-<!--
-	<test name="REST Assured Static Setup">
-		<request>
-			<identifier>active:groovy</identifier>
-			<argument name="operator">res:/test/util/ra-static-state-setup.gy</argument>
-		</request>
-	</test>
--->
-
 	<!-- ===================================================================== -->
 
 	<test name="GET of non-existent identifier resource">
@@ -69,8 +60,8 @@
 
 	<test name="Reset REST Assured Static State">
 		<request>
-			<identifier>active:groovy</identifier>
-			<argument name="operator">res:/test/util/ra-reset-static-state.gy</argument>
+			<identifier>active:RESTAssured/config</identifier>
+			<verb>DELETE</verb>
 		</request>
 	</test>
 
