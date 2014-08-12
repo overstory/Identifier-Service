@@ -1,36 +1,4 @@
 <config>
-	<!-- See: https://code.google.com/p/rest-assured/wiki/Usage#Default_values -->
-	<baseURI>http://localhost</baseURI>
-	<port>8080</port>
-	<basePath>/idsvc</basePath>
-<!--
-	<authentication>basic("username", "password")</authentication>
-	<rootPath>x.y.z</rootPath>
--->
-	<namespaceAware>true</namespaceAware>
-	<xmlContentTypes>
-		<xmlContentType>application/vnd.overstory.error+xml</xmlContentType>
-		<xmlContentType>application/vnd.overstory.meta.id+xml</xmlContentType>
-	</xmlContentTypes>
-	<namespaceBindings>
-		<namespaceBinding>
-			<prefix>e</prefix>
-			<uri>http://overstory.co.uk/ns/errors</uri>
-		</namespaceBinding>
-		<namespaceBinding>
-			<prefix>i</prefix>
-			<uri>http://ns.overstory.co.uk/namespaces/resources/meta/id</uri>
-		</namespaceBinding>
-		<namespaceBinding>
-			<prefix>atom</prefix>
-			<uri>http://www.w3.org/2005/Atom</uri>
-		</namespaceBinding>
-		<namespaceBinding>
-			<prefix>foo</prefix>
-			<uri>the-foo-namespace</uri>
-		</namespaceBinding>
-	</namespaceBindings>
-
 	<test-rig>
 		<ml-admin-baseURI>http://localhost:5029/actions/</ml-admin-baseURI>
 		<ml-actions>
