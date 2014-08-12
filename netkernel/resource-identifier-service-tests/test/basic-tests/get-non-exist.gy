@@ -7,10 +7,11 @@ import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
 
-assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
+context.sink ("active:RESTAssured/config", context.source ("res:/test/idsvc/ra-config.xml"))
+context.sink ("active:RESTAssured/xml-config", context.source ("res:/test/idsvc/xml-config.xml"))
 
-RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
-NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+RestAssuredConfig xmlconfig = context.source ("active:RESTAssured/xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:RESTAssured/xml-config/namespaces", NamespaceContext.class)
 
 // Assert non-empty body and not found error result for the requested resource
 given()

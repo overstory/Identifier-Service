@@ -7,9 +7,11 @@ import static org.hamcrest.Matchers.*
 INKFRequestContext context = context
 
 assert (context.source ("active:ml-test-rig/clear-db"))
-assert (context.source ("active:idsvc-ra-setup-static-state"))
 
-RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+context.sink ("active:RESTAssured/config", context.source ("res:/test/idsvc/ra-config.xml"))
+context.sink ("active:RESTAssured/xml-config", context.source ("res:/test/idsvc/xml-config.xml"))
+
+RestAssuredConfig xmlconfig = context.source ("active:RESTAssured/xml-config", RestAssuredConfig.class)
 
 for (i = 0; i < 3; i++) {
 	def templateRoot = "myid:${i}:"
@@ -17,7 +19,7 @@ for (i = 0; i < 3; i++) {
 
 	given()
 		.config (xmlconfig)
-		.queryParam ("template", "${templateRoot}{guid}".toString ())
+		.queryParam ("template", "${templateRoot}{guid}".toString())
 		.body ("")
 	.when()
 		.post ("/identifier")
@@ -26,7 +28,7 @@ for (i = 0; i < 3; i++) {
 		.statusCode (201)
 		.body (equalTo (""))
 		.header ("Location", not (empty ()))
-		.header ("Location", containsString ("/identifier/id/${idRoot}${templateRoot}"))
+		.header ("Location", containsString ("/identifier/id/${idRoot}${templateRoot}".toString()))
 		.header ("X-URI", not (empty ()))
 		.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
 		.header ("ETag", not (empty ()))

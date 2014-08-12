@@ -2,14 +2,15 @@ import org.netkernel.layer0.nkf.INKFRequestContext
 
 import static com.jayway.restassured.RestAssured.*
 import com.jayway.restassured.config.RestAssuredConfig
-import static org.hamcrest.Matchers.*
 
 INKFRequestContext context = context
 
 assert (context.source ("active:ml-test-rig/clear-db"))
-assert (context.source ("active:idsvc-ra-setup-static-state"))
 
-RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
+context.sink ("active:RESTAssured/config", context.source ("res:/test/idsvc/ra-config.xml"))
+context.sink ("active:RESTAssured/xml-config", context.source ("res:/test/idsvc/xml-config.xml"))
+
+RestAssuredConfig xmlconfig = context.source ("active:RESTAssured/xml-config", RestAssuredConfig.class)
 
 def templateRoot = "resource:".toString()
 def idRoot = 'urn:overstory.co.uk:id:resource:'

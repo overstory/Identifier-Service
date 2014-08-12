@@ -12,10 +12,12 @@ boolean doLoad = ! context.getThisRequest ().argumentExists ("noload")
 if (doLoad) {
 	assert (context.source ("active:ml-test-rig/clear-db"))
 }
-assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
 
-RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
-NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context", NamespaceContext.class)
+context.sink ("active:RESTAssured/config", context.source ("res:/test/idsvc/ra-config.xml"))
+context.sink ("active:RESTAssured/xml-config", context.source ("res:/test/idsvc/xml-config.xml"))
+
+RestAssuredConfig xmlconfig = context.source ("active:RESTAssured/xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:RESTAssured/xml-config/namespaces", NamespaceContext.class)
 
 def prefix = 'urn:overstory.co.uk:id:resource:'
 

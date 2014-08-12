@@ -17,6 +17,43 @@
 	</system>
 
 	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:tests" public="true" name="Identifier Service REST Tests">
+		<literal uri="res:/test/idsvc/ra-config.xml" type="xml">
+			<ra-config>
+				<basePath>/idsvc</basePath>
+				<urlEncodingEnabled>true</urlEncodingEnabled>
+				<xml-content-types>
+					<xml-type>application/vnd.overstory.error+xml</xml-type>
+					<xml-type>application/vnd.overstory.meta.id+xml</xml-type>
+				</xml-content-types>
+				<test-content-types>
+					<text-type>application/vnd.foobar.no.such.type+xyz</text-type>
+				</test-content-types>
+			</ra-config>
+		</literal>
+		<literal uri="res:/test/idsvc/xml-config.xml" type="xml">
+			<xml-config>
+				<namespace-aware>true</namespace-aware>
+				<namespaces>
+					<namespace>
+						<prefix>e</prefix>
+						<uri>http://overstory.co.uk/ns/errors</uri>
+					</namespace>
+					<namespace>
+						<prefix>i</prefix>
+						<uri>http://ns.overstory.co.uk/namespaces/resources/meta/id</uri>
+					</namespace>
+					<namespace>
+						<prefix>atom</prefix>
+						<uri>http://www.w3.org/2005/Atom</uri>
+					</namespace>
+					<namespace>
+						<prefix>foo</prefix>
+						<uri>the-foo-namespace</uri>
+					</namespace>
+				</namespaces>
+			</xml-config>
+		</literal>
+
 		<fileset>
 			<regex>res:/etc/system/SimpleDynamicImportHook.xml</regex>
 		</fileset>
@@ -58,55 +95,6 @@
 						<argument name="operand">res:/test/svcconfig.xml</argument>
 					</request>
 				</endpoint>
-
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:idsvc-ra-xml-config</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/util/ra-xml-config.gy</argument>
-					</request>
-				</endpoint>
-
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:idsvc-ra-setup-static-state</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/util/ra-static-state-setup.gy</argument>
-					</request>
-				</endpoint>
-
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:idsvc-ra-reset-static-state</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/util/ra-reset-static-state.gy</argument>
-					</request>
-				</endpoint>
-
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:idsvc-namespaces-context</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/util/namespaces.gy</argument>
-					</request>
-				</endpoint>
-
 			</config>
 
 			<space/>
@@ -166,6 +154,9 @@
 				</import>
 				<fileset>
 					<regex>res:/resources/.*</regex>
+				</fileset>
+				<fileset>
+					<regex>res:/test/.*</regex>
 				</fileset>
 			</space>
 		</mapper>
