@@ -7,7 +7,11 @@ import javax.xml.namespace.NamespaceContext
 
 INKFRequestContext context = context
 
-assert (context.source ("active:ml-test-rig/clear-db"))
+boolean doLoad = ! context.getThisRequest ().argumentExists ("noload")
+
+if (doLoad) {
+	assert (context.source ("active:ml-test-rig/clear-db"))
+}
 assert (context.source ("active:idsvc-ra-setup-static-state", Boolean.class))
 
 RestAssuredConfig xmlconfig = context.source ("active:idsvc-ra-xml-config", RestAssuredConfig.class)
@@ -15,21 +19,26 @@ NamespaceContext namespaces = context.source ("active:idsvc-namespaces-context",
 
 def prefix = 'urn:overstory.co.uk:id:resource:'
 
+// 'noload' is given for second run to prevent reloading data
+// This test will not run properly if it doesn't follow a run without the 'noload' option
+
+if (doLoad) {
 // load up the DB with 25 identifiers
-for (i = 0; i < 25; i++) {
-	given()
-		.config (xmlconfig)
-		.body ("")
-	.when()
-		.post ("/identifier")
-	.then()
-		.log().ifStatusCodeMatches (not(201))
-		.statusCode (201)
-		.body (equalTo (""))
-		.header ("Location", containsString ("/identifier/id/${prefix}".toString()))
-		.header ("X-URI", startsWith (prefix))
-		.header ("ETag", not (empty()))
-	;
+	for (i = 0; i < 25; i++) {
+		given()
+			.config (xmlconfig)
+			.body ("")
+		.when()
+			.post ("/identifier")
+		.then()
+			.log().ifStatusCodeMatches (not(201))
+			.statusCode (201)
+			.body (equalTo (""))
+			.header ("Location", containsString ("/identifier/id/${prefix}".toString()))
+			.header ("X-URI", startsWith (prefix))
+			.header ("ETag", not (empty()))
+		;
+	}
 }
 
 assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 25)

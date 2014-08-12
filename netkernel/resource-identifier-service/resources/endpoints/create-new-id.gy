@@ -5,6 +5,7 @@ import org.netkernel.layer0.nkf.INKFRequestContext
 import org.netkernel.layer0.nkf.INKFResponse
 import org.netkernel.layer0.nkf.INKFResponseReadOnly
 import org.netkernel.layer0.nkf.NKFException
+import org.netkernel.layer0.representation.IHDSNode
 
 INKFRequestContext context = context
 
@@ -15,83 +16,57 @@ try {
 	String url = context.source ("arg:url")
 	String urlPath = url.replaceFirst ('http://([-a-zA-Z0-9]+)(:[0-9]+)', '')
 	String svcPrefix = urlPath.replaceFirst ('/identifier', '')
-	String stateId = newHttpState (context)
 
-	req = context.createRequest ("active:httpAsyncPost")
+	INKFRequest req = context.createRequest ('active:httpAsync')
+	req.addArgumentByValue ("method", 'POST')
 	req.addArgument ("url", context.source ("active:ml/fullurl/identifier${templateArg}", String.class))
-	req.addArgument ("config", "res:/config/http-config.xml")
-	req.addArgumentByValue ("state", stateId)
 	req.addArgumentByValue ("body", body)
-	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
+	req.addArgument ("config", "arg:config")
+	req.addArgument ("credentials", "arg:credentials")
+	req.addArgumentByValue ("callback", new CompletedPostListener (svcPrefix))
 	if (mimetype != null) {
 		req.addArgumentByValue ("headers", "<hds><Content-Type>${mimetype}</Content-Type></hds>".toString())
 	}
-	req.setRepresentationClass (HttpClientResponseRepresentation.class);
+	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
 
-	//Issue the request asynchronously and release this thread back to do work
-	handle = context.issueAsyncRequest (req)
-
-	//Finally set listener and return this thread
-	handle.setListener (new CompletedPostListener (svcPrefix, stateId))
+	context.issueAsyncRequest (req).setListener (context.source ("active:httpAsync/passthru-listener", INKFAsyncRequestListener.class))
 	context.setNoResponse()
 } catch (e) {
 	e.printStackTrace()
 	throw e
 }
 
-def newHttpState (INKFRequestContext context)
-{
-	INKFRequest req = context.createRequest ("res:/httpState/newState")
-
-	// Make sure this resource does not depend on the transient HTTP state
-	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
-
-	return context.issueRequest (req)
-}
-
-class CompletedPostListener implements INKFAsyncRequestListener
+def class CompletedPostListener implements INKFAsyncRequestListener
 {
 	String svcPrefix
-	String stateId
 
-	CompletedPostListener (String svcPrefix, String stateId)
+	CompletedPostListener (String svcPrefix)
 	{
 		this.svcPrefix = svcPrefix
-		this.stateId = stateId
 	}
 
 	def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
 	{
-		context.delete (stateId)
 		context.createResponseFrom (aException);
 	}
 
-	static def void copyHeaderToOuter (INKFResponse response, HttpClientResponseRepresentation hcrr, String headerName, String prefix)
-	{
-		String value = (hcrr.getHeader (headerName) == null) ? "" : hcrr.getHeader (headerName)
-
-		response.setHeader ("httpResponse:/header/${headerName}", "${prefix}${value}".toString())
-	}
-
-	static def void copyHeaderToOuter (INKFResponse response, HttpClientResponseRepresentation hcrr, String headerName)
-	{
-		copyHeaderToOuter (response, hcrr, headerName, "")
-	}
-
-	//Receive the client request's response and pass through the relevant pieces.
 	def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext context)
 	{
-		context.delete (stateId)
-
 		HttpClientResponseRepresentation hcrr = resp.getRepresentation() as HttpClientResponseRepresentation
-		def response = context.createResponseFrom (hcrr.getEntity())
 
-		response.setMimeType (hcrr.getHeader ("Content-Type"))
+		List<String> dontCopyHeaders = [ "content-length", "server", "connection", "keep-alive", "location" ]
+		INKFResponse response = context.createResponseFrom (hcrr.getEntity())
+		response.setMimeType (hcrr.getHeader ("content-type"))
 		response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
-		copyHeaderToOuter (response, hcrr, "Location", svcPrefix)
-		copyHeaderToOuter (response, hcrr, "X-URI")
-		copyHeaderToOuter (response, hcrr, "ETag")
-		copyHeaderToOuter (response, hcrr, "Content-Type")
-		response.setHeader ("httpResponse:/header/Server", "")
+
+		hcrr.getImplementingHDS().getNodes("//httpHeaders/*").each { IHDSNode node ->
+			String name = node.getName()
+			if ( ! dontCopyHeaders.contains (name.toLowerCase())) {
+				response.setHeader ("httpResponse:/header/${ name }".toString(), node.getValue())
+			}
+		}
+
+		// ToDo: Figure out how to factor this into the generic httpAsync client
+		response.setHeader ("httpResponse:/header/Location", "${svcPrefix}${hcrr.getHeader ('location')}".toString())
 	}
 }

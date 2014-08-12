@@ -143,7 +143,7 @@
 			<uri>urn:org:netkernel:ext:system</uri>	<!--Required for Exception to DOM Transreptor-->
 		</import>
 		<import>
-			<uri>urn:overstory.co.uk:service:resource:identifier:httpstatemanager:test-rig</uri>
+			<uri>urn:overstory.co.uk:service:resource:identifier:test-rig</uri>
 		</import>
 		<import>
 			<uri>urn:overstory.co.uk:service:resource:identifier:toolbox:test</uri>
@@ -154,61 +154,23 @@
 	</rootspace>
 
 	<!-- This should be in a standalone module? -->
-	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager:test-rig" public="false" name="Test Rig">
+	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:test-rig" public="false" name="Test Rig">
 		<fileset>
 			<regex>res:/etc/system/SimpleDynamicImportHook.xml</regex>
 		</fileset>
 		<mapper>
-			<config>
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:ml-test-rig/clear-db</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/ml-test-rig/clear-db.gy</argument>
-					</request>
-				</endpoint>
-
-				<endpoint>
-					<grammar>
-						<active>
-							<identifier>active:ml-test-rig/identifier-count</identifier>
-						</active>
-					</grammar>
-					<request>
-						<identifier>active:groovy</identifier>
-						<argument name="operator">res:/test/ml-test-rig/identifier-count.gy</argument>
-					</request>
-				</endpoint>
-
-			</config>
+			<config>res:/test/ml-test-rig/mappings.xml</config>
 			<space>
 				<import>
 					<uri>urn:overstory.co.uk:service:resource:identifier:toolbox:test</uri>
 				</import>
-				<import>
-					<uri>urn:overstory.co.uk:service:resource:identifier:httpstatemanager</uri>
-				</import>
-				<import>
-					<uri>urn:org:netkernel:mod:pds</uri>
-				</import>
-				<import>
-					<uri>urn:org:netkernel:mod:pds:memory</uri>
-				</import>
 				<fileset>
 					<regex>res:/resources/.*</regex>
 				</fileset>
-				<literal uri="res:/etc/pdsConfig.xml" type="xml">
-					<config>
-						<zone>overstory:identifier:httpstatemanager:test-rig</zone>
-					</config>
-				</literal>
 			</space>
 		</mapper>
 	</rootspace>
+
 
 	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:toolbox:test" public="false" name="Toolbox">
 		<import>

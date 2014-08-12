@@ -52,7 +52,6 @@ given()
 	.header ("X-URI", not (empty ()))
 	.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
 	.header ("ETag", not (empty()))
-;
 
 def String uri = "${idRoot}${templateRoot}0"
 
@@ -68,7 +67,6 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
 	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
 	.body (hasXPath ("/i:identifier-info/i:annotation/foo:my-stuff/foo:label", namespaces, equalTo ("This is the label")))
-;
 
 // Validate that update is not allowed without an ETag
 given()
@@ -82,7 +80,6 @@ given()
 	.statusCode (409)
 	.body (not (equalTo ("")))
 	.body (hasXPath ("/e:errors/e:etag-mismatch/e:message", namespaces, startsWith ("ETag value must be provided on mutation request")))
-;
 
 // Get the current ID resource, save the ETag header value
 String etag =
@@ -90,8 +87,8 @@ String etag =
 	.config (xmlconfig)
 	.header ("Accept", "application/vnd.overstory.meta.id+xml")
 	.get ("/identifier/id/${uri}")
-	.header ("ETag");
-;
+	.header ("ETag")
+
 
 // Try the update with the ETag
 given()
@@ -106,9 +103,8 @@ given()
 	.statusCode (204)
 	.header ("ETag", not (empty()))
 	.body (equalTo (""))
-;
 
-// Validate tht the annotation occurred as expected
+// Validate that the annotation occurred as expected
 given()
 	.config (xmlconfig)
 .when()
@@ -121,7 +117,6 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
 	.body (hasXPath ("/i:identifier-info/i:annotation/foo:some-other-stuff/foo:blarg", namespaces, equalTo ("I have been changed")))
 	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:replace-annotation ", namespaces))
-;
 
 bogusEtag = '"jfnlanffdjfglsjdhgfdlsfnvlsdnlsrdlsjadnlfansflsfn"'
 
@@ -138,7 +133,6 @@ given()
 	.body (not (equalTo ("")))
 	.body (hasXPath ("/e:errors/e:etag-mismatch/e:message", namespaces, startsWith ("Given ETag (${bogusEtag}) does not match current ETag (")))
 	.body (hasXPath ("/e:errors/e:etag-mismatch/e:given-etag", namespaces, equalTo (bogusEtag)))
-;
 
 // Get the current ID resource, save the ETag header value
 etag =
@@ -146,8 +140,8 @@ etag =
 		.config (xmlconfig)
 		.header ("Accept", "application/vnd.overstory.meta.id+xml")
 		.get ("/identifier/id/${uri}")
-		.header ("ETag");
-;
+		.header ("ETag")
+
 
 // Try the delete with the ETag
 given()
@@ -160,7 +154,6 @@ given()
 	.statusCode (204)
 	.header ("ETag", not (empty()))
 	.body (equalTo (""))
-;
 
 // Fetch the ID resource and make sure there is no annotation
 given()
@@ -174,7 +167,6 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:system/i:uri", namespaces, equalTo (uri)))
 	.body (not (hasXPath ("/i:identifier-info/i:annotation", namespaces)))
 	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:delete-annotation ", namespaces))
-;
 
 // Get the current ID resource, save the ETag header value
 etag =
@@ -183,7 +175,6 @@ etag =
 		.header ("Accept", "application/vnd.overstory.meta.id+xml")
 		.get ("/identifier/id/${uri}")
 		.header ("ETag");
-;
 
 // Put the annotation back
 given()
@@ -198,7 +189,6 @@ given()
 	.statusCode (204)
 	.header ("ETag", not (empty()))
 	.body (equalTo (""))
-;
 
 // Validate that the annotation is now as expected
 given()
@@ -213,7 +203,6 @@ given()
 	.body (hasXPath ("/i:identifier-info/i:annotation", namespaces))
 	.body (hasXPath ("/i:identifier-info/i:annotation/foo:some-other-stuff/foo:blarg", namespaces, equalTo ("I have been changed")))
 	.body (hasXPath ("/i:identifier-info/i:system/i:history/i:add-annotation ", namespaces))
-;
 
 
 assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 1)

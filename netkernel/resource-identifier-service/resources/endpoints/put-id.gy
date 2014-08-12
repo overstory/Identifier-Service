@@ -1,9 +1,7 @@
-import org.netkernel.client.http.representation.HttpClientResponseRepresentation
 import org.netkernel.layer0.nkf.INKFAsyncRequestListener
 import org.netkernel.layer0.nkf.INKFRequest
 import org.netkernel.layer0.nkf.INKFRequestContext
-import org.netkernel.layer0.nkf.INKFResponseReadOnly
-import org.netkernel.layer0.nkf.NKFException
+import org.netkernel.layer0.representation.impl.HDSBuilder
 
 INKFRequestContext context = context
 
@@ -11,84 +9,26 @@ try {
 	String id = context.getThisRequest().getArgumentValue ("id")
 	String etag = context.source ("arg:etag")
 	String mimetype = context.source ("arg:mimetype")
-	String stateId = newHttpState (context)
 
-	// FixMe: Build a proper HDS for this
-	StringBuilder sb = new StringBuilder ("<hds>")
-	if (mimetype != null) {
-		sb.append ("<Content-Type>").append (mimetype).append ("</Content-Type>")
-	}
-	if (etag != null) {
-		sb.append ("<ETag>").append (etag).append ("</ETag>")
-	}
-	sb.append ("</hds>")
+	HDSBuilder builder = new HDSBuilder()
+	builder.pushNode ('hds')
+	if (mimetype != null) builder.addNode ('Content-Builder', mimetype)
+	if (etag != null) builder.addNode ('ETag', etag)
 
-	req = context.createRequest ("active:httpAsyncPut")
+	INKFRequest req = context.createRequest ('active:httpAsync')
+	req.addArgumentByValue ("method", 'PUT')
 	req.addArgument ("url", context.source ("active:ml/fullurl/identifier/id/${id}", String.class))
-	req.addArgument ("config", "res:/config/http-config.xml")
-	req.addArgumentByValue ("state", stateId)
 	req.addArgument ("body", "arg:body")
-	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
-	req.addArgumentByValue ("headers", sb.toString())
-	req.setRepresentationClass (HttpClientResponseRepresentation.class);
+	req.addArgument ("config", "arg:config")
+	req.addArgument ("credentials", "arg:credentials")
+	req.addArgument ("cut-golden-thread", id)
+	req.addArgumentByValue ("headers", builder.getRoot())
+//	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
 
-	//Issue the request asynchronously and release this thread back to do work
-	handle = context.issueAsyncRequest (req)
-
-	//Finally set listener and return this thread
-	handle.setListener (new CompletedPutListener ([id], stateId))
+	context.issueAsyncRequest (req).setListener (context.source ("active:httpAsync/passthru-listener", INKFAsyncRequestListener.class))
 	context.setNoResponse()
 } catch (e) {
 	e.printStackTrace()
 	throw e
 }
 
-def newHttpState (INKFRequestContext context)
-{
-	INKFRequest req = context.createRequest ("res:/httpState/newState")
-
-	// Make sure this resource does not depend on the transient HTTP state
-	req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
-
-	return context.issueRequest (req)
-}
-
-class CompletedPutListener implements INKFAsyncRequestListener
-{
-	List<String> goldenTreads
-	String stateId
-
-	def public CompletedPutListener (List<String> goldenThreads, String stateId)
-	{
-		this.goldenTreads = goldenThreads
-		this.stateId = stateId
-	}
-
-	def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
-	{
-		context.delete (stateId)
-		context.createResponseFrom (aException);
-	}
-
-	//Receive the client request's response and pass through the relevant pieces.
-	def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext context)
-	{
-		context.delete (stateId)
-
-		//Cut Golden Threads to force re-fetch on next access
-		def req = context.createRequest ("active:cutGoldenThread")
-
-		goldenTreads.each { String thread -> req.addArgument ("id", thread) }
-		context.issueRequest (req)
-
-		HttpClientResponseRepresentation hcrr = resp.getRepresentation() as HttpClientResponseRepresentation
-
-		def responseOuter = context.createResponseFrom (hcrr.getEntity())
-		responseOuter.setMimeType (hcrr.getHeader ("content-type"))
-		responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
-		responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader ("content-type"))
-		responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
-		responseOuter.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
-		responseOuter.setHeader ("httpResponse:/header/Server", "")
-	}
-}

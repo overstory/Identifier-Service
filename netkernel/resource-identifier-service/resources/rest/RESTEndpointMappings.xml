@@ -21,6 +21,8 @@
 			<argument name="url">httpRequest:/url</argument>
 			<argument name="body">httpRequest:/body</argument>
 			<argument name="mimetype">httpRequest:/header/Content-Type</argument>
+			<argument name="config">res:/config/http-config.xml</argument>
+			<argument name="credentials">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 
@@ -46,6 +48,8 @@
 			<argument name="mimetype">httpRequest:/header/Accept</argument>
 			<argument name="url">httpRequest:/url</argument>
 			<argument name="queryString">httpRequest:/query</argument>
+			<argument name="config">res:/config/http-config.xml</argument>
+			<argument name="credentials">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 
@@ -70,6 +74,8 @@
 			<identifier>active:groovy</identifier>
 			<argument name="operator">res:/resources/endpoints/get-id.gy</argument>
 			<argument name="id">arg:id</argument>
+			<argument name="config">res:/config/http-config.xml</argument>
+			<argument name="credentials">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 
@@ -97,6 +103,8 @@
 			<argument name="etag">httpRequest:/header/ETag</argument>
 			<argument name="mimetype">httpRequest:/header/Content-Type</argument>
 			<argument name="body">httpRequest:/body</argument>
+			<argument name="config">res:/config/http-config.xml</argument>
+			<argument name="credentials">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 
@@ -122,6 +130,8 @@
 			<argument name="operator">res:/resources/endpoints/delete-id.gy</argument>
 			<argument name="id">arg:id</argument>
 			<argument name="etag">httpRequest:/header/ETag</argument>
+			<argument name="config">res:/config/http-config.xml</argument>
+			<argument name="credentials">res:/config/http-credentials.xml</argument>
 		</request>
 	</endpoint>
 

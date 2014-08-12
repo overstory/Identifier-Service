@@ -47,6 +47,17 @@
 		</request>
 	</test>
 
+	<test name="Simple pagination, repeated for caching">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/basic-tests/simple-pagination.gy</argument>
+			<argument name="noload">true</argument>
+		</request>
+		<assert>
+			<maxTime>600</maxTime>
+		</assert>
+	</test>
+
 	<test name="Self link in Atom entry">
 		<request>
 			<identifier>active:RESTAssured</identifier>

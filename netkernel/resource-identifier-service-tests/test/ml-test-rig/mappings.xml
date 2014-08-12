@@ -1,0 +1,36 @@
+<config>
+	<endpoint>
+		<grammar>
+			<active>
+				<identifier>active:ml-test-rig/clear-db</identifier>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/test/ml-test-rig/clear-db.gy</argument>
+		</request>
+	</endpoint>
+
+	<endpoint>
+		<grammar>
+			<active>
+				<identifier>active:ml-test-rig/identifier-count</identifier>
+			</active>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/test/ml-test-rig/identifier-count.gy</argument>
+		</request>
+	</endpoint>
+
+	<endpoint>
+		<grammar>
+			<simple>res:/httpState/newState</simple>
+		</grammar>
+		<request>
+			<identifier>active:groovy</identifier>
+			<argument name="operator">res:/test/ml-test-rig/new-state.gy</argument>
+		</request>
+	</endpoint>
+
+</config>

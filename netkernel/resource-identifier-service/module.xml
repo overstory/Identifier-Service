@@ -38,7 +38,8 @@
 							<uri>urn:overstory.co.uk:service:resource:identifier:normalized</uri>
 						</import>
 						<import>
-							<uri>urn:overstory.co.uk:service:resource:identifier:httpstatemanager</uri>
+							<!-- Available at https://github.com/overstory/netkernel-public-modules -->
+							<uri>urn:overstory.co.uk:nk:modules:http-async</uri>
 						</import>
 						<fileset>
 							<regex>res:/resources/.*</regex>
@@ -99,31 +100,6 @@
 				<fileset>
 					<regex>res:/resources/.*</regex>
 				</fileset>
-			</space>
-		</mapper>
-	</rootspace>
-
-	<rootspace uri="urn:overstory.co.uk:service:resource:identifier:httpstatemanager" public="true" name="HTTP State manager">
-		<mapper>
-			<config>res:/resources/http/HttpStateMappings.xml</config>
-			<space>
-				<import>
-					<uri>urn:overstory.co.uk:service:resource:identifier:toolbox</uri>
-				</import>
-				<import>
-					<uri>urn:org:netkernel:mod:pds</uri>
-				</import>
-				<import>
-					<uri>urn:org:netkernel:mod:pds:memory</uri>
-				</import>
-				<fileset>
-					<regex>res:/resources/.*</regex>
-				</fileset>
-				<literal uri="res:/etc/pdsConfig.xml" type="xml">
-					<config>
-					  	<zone>overstory:identifier:httpstatemanager</zone>
-					</config>
-				</literal>
 			</space>
 		</mapper>
 	</rootspace>
