@@ -7,6 +7,7 @@ import org.netkernel.client.http.representation.HttpClientResponseRepresentation
 INKFRequestContext context = context
 
 try {
+    String accept = context.source ("httpRequest:/accept/preferred")
 	String url = context.source ("arg:url")
 	String queryString = (context.source ("arg:queryString") == null) ? "" : "?${context.source ('arg:queryString')}".toString()
 	String stateId = newHttpState (context)
@@ -19,7 +20,7 @@ try {
 	req.setRepresentationClass (HttpClientResponseRepresentation.class);
 
 	//Issue the request asynchronously and release this thread back to do work
-	context.issueAsyncRequest (req).setListener (new CompletedListener (url, queryString, stateId))
+	context.issueAsyncRequest (req).setListener (new CompletedListener (url, queryString, stateId, accept))
 	context.setNoResponse()
 } catch (e) {
 	e.printStackTrace()
@@ -41,12 +42,14 @@ class CompletedListener implements INKFAsyncRequestListener
 	String url
 	String queryString
 	String stateId
+    String accept
 
-	CompletedListener (String url, String queryString, stateId)
+	CompletedListener (String url, String queryString, stateId, String accept)
 	{
 		this.url = url
 		this.queryString = queryString
 		this.stateId = stateId
+        this.accept = accept
 	}
 
 	def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
@@ -73,12 +76,25 @@ class CompletedListener implements INKFAsyncRequestListener
 			req.addArgumentByValue ("template", rep)
 			rep = context.issueRequest(req)
 
-			def responseOuter = context.createResponseFrom (rep)
-			responseOuter.setMimeType (hcrr.getHeader ("content-type"))
-			//responseOuter.setMimeType ("text/xml")
-			responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
-			responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader("content-type"))
-			responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+            if (accept.equals("application/json")) {
+                req = context.createRequest ("active:JSONFromXML")
+                req.addArgumentByValue ("operand", rep)
+                rep = context.issueRequest (req)
+
+                INKFResponse response = context.createResponseFrom (rep)
+                response.setMimeType ("application/json")
+                response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+                response.setHeader ("httpResponse:/header/Content-Type", "application/json")
+                response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+            } else {
+                def responseOuter = context.createResponseFrom (rep)
+                responseOuter.setMimeType (hcrr.getHeader ("content-type"))
+                //responseOuter.setMimeType ("text/xml")
+                responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+                responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader("content-type"))
+                responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+            }
+
 		} else {
 			response = context.createResponseFrom (hcrr.getEntity())
 			response.setMimeType (hcrr.getHeader ("content-type"))
