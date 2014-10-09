@@ -1,23 +1,20 @@
 <config>
-		<endpoint>
-		<meta>
-			<todo owner="pjr" progress="10">
-			</todo>
-		</meta>
-		<grammar>
-			<active>
-				<identifier>active:normalized/content/id-GET</identifier>
-				<argument name="id"/>
-				<argument name="pub-status"/>
-			</active>
-		</grammar>
-		<request>
-			<identifier>active:groovy</identifier>
-			<argument name="operator">res:/resources/iopREST-content-id-GET-Normalized.gy</argument>
-			<argument name="id">arg:id</argument>
-			<argument name="pub-status">arg:pub-status</argument>
-		</request>
-	</endpoint>
+
+    <endpoint>
+        <grammar>
+            <active>
+                <identifier>active:idsvcNormalized/get-id</identifier>
+                <argument name="id"/>
+                <argument name="content-type"/>
+            </active>
+        </grammar>
+        <request>
+            <identifier>active:groovy</identifier>
+            <argument name="operator">res:/resources/endpoints/get-id-NORMALIZED.gy</argument>
+            <argument name="id">arg:id</argument>
+            <argument name="content-type">arg:content-type</argument>
+        </request>
+    </endpoint>
 
 		<!-- ============================================================================ -->
 
