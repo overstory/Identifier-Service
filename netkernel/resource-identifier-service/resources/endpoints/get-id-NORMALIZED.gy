@@ -1,0 +1,105 @@
+import org.netkernel.client.http.representation.HttpClientResponseRepresentation
+import org.netkernel.layer0.nkf.INKFAsyncRequestListener
+import org.netkernel.layer0.nkf.INKFRequest
+import org.netkernel.layer0.nkf.INKFRequestContext
+import org.netkernel.layer0.nkf.INKFResponse
+import org.netkernel.layer0.nkf.INKFResponseReadOnly
+import org.netkernel.layer0.nkf.NKFException
+
+INKFRequestContext context = context
+
+try {
+
+    String accept = context.source ("arg:content-type")
+    String id = context.getThisRequest ().getArgumentValue ("id")
+    String stateId = newHttpState (context)
+
+    req = context.createRequest ("active:httpAsyncGet")
+    req.addArgument ("url", context.source ("active:ml/fullurl/identifier/id/${id}", String.class))
+    req.addArgument ("config", "res:/config/http-config.xml")
+    req.addArgumentByValue ("state", stateId)
+    req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);  //We're going to take control of the caching at this level so ignore lower dependencies
+    req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id+xml</Accept></hds>")
+    req.setRepresentationClass (HttpClientResponseRepresentation.class);
+
+    // ToDo: Check requested content type in Accept header, transrept if needed.
+
+    //Issue the request asynchronously and release this thread back to do work
+    handle = context.issueAsyncRequest (req)
+
+    //Finally set listener and return this thread
+    handle.setListener (new CompletedListener ([id, "master-flush-gt"], stateId, accept))
+    context.setNoResponse ()
+
+} catch (e) {
+    e.printStackTrace ()
+    throw e
+}
+
+def newHttpState (INKFRequestContext context)
+{
+    INKFRequest req = context.createRequest ("res:/httpState/newState")
+
+    // Make sure this resource does not depend on the transient HTTP state
+    req.setHeader (INKFRequest.HEADER_EXCLUDE_DEPENDENCIES, true);
+
+    return context.issueRequest (req)
+}
+
+class CompletedListener implements INKFAsyncRequestListener
+{
+    List<String> goldenThreads
+    String stateId
+    String accept
+
+    def public CompletedListener (List<String> goldenThreads, String stateId, String accept)
+    {
+        this.goldenThreads = goldenThreads
+        this.stateId = stateId
+        this.accept = accept
+    }
+
+    def void receiveException (NKFException aException, INKFRequest aRequest, INKFRequestContext context)
+    {
+        context.delete (stateId)
+        context.createResponseFrom (aException);
+    }
+
+    //Receive the client request's response and pass through the relevant pieces.
+    def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext context)
+    {
+        context.delete (stateId)
+
+        //Attach Golden Threads...
+        INKFRequest req = context.createRequest ("active:attachGoldenThread")
+
+        goldenThreads.each { String thread -> req.addArgument ("id", thread) }
+        context.issueRequest (req)
+
+        HttpClientResponseRepresentation hcrr = resp.getRepresentation () as HttpClientResponseRepresentation
+
+        if (accept.equals("application/json")) {
+            req = context.createRequest ("active:JSONFromXML")
+            req.addArgumentByValue ("operand", hcrr.getEntity ())
+            def rep = context.issueRequest (req)
+
+            INKFResponse response = context.createResponseFrom (rep)
+            response.setMimeType ("application/json")
+            response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
+            response.setHeader ("httpResponse:/header/Content-Type", "application/json")
+            response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+        } else {
+            def responseOuter = context.createResponseFrom (hcrr.getEntity ())
+            responseOuter.setMimeType (hcrr.getHeader ("content-type"))
+            responseOuter.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+            responseOuter.setHeader ("httpResponse:/header/Content-Type", hcrr.getHeader ("content-type"))
+            responseOuter.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+            responseOuter.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+            responseOuter.setHeader ("httpResponse:/header/Server", "")
+        }
+
+
+    }
+}
+
+

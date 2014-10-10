@@ -42,8 +42,9 @@
 
 			<atom:content type="application/vnd.overstory.meta.id+xml">
 				<xrl:include>
-					<xrl:identifier>active:idsvc/get-id</xrl:identifier>
+					<xrl:identifier>active:idsvcNormalized/get-id</xrl:identifier>
 					<xrl:argument name="id"><xsl:value-of select="."/></xrl:argument>
+                    <xrl:argument name="content-type"><literal type="string">application/xml</literal></xrl:argument>
 					<xrl:async>false</xrl:async>
 				</xrl:include>
 			</atom:content>
