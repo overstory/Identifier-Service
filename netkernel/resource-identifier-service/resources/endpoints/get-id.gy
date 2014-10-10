@@ -1,23 +1,16 @@
-import org.netkernel.layer0.nkf.INKFAsyncRequestListener
 import org.netkernel.layer0.nkf.INKFRequestContext
 
-INKFRequestContext context = context
-
 try {
-	String id = context.getThisRequest().getArgumentValue ("id")
+	INKFRequestContext context = context
 
-	req = context.createRequest ('active:httpAsync')
-	req.addArgumentByValue ("method", 'GET')
-	req.addArgument ("url", context.source ("active:ml/fullurl/identifier/id/${id}", String.class))
+	req = context.createRequest ("active:idsvcNormalized/get-id")
+	req.addArgument ("id", "arg:id")
+	req.addArgument ("content-type", "httpRequest:/accept/preferred")
 	req.addArgument ("config", "arg:config")
 	req.addArgument ("credentials", "arg:credentials")
-	req.addArgumentByValue ("headers", "<hds><Accept>application/vnd.overstory.meta.id+xml</Accept></hds>")
-	req.addArgument ("golden-thread", id)
-
-	context.issueAsyncRequest (req).setListener (context.source ("active:httpAsync/passthru-listener", INKFAsyncRequestListener.class))
-	context.setNoResponse()
+	resp = context.issueRequestForResponse (req)
+	context.createResponseFrom (resp)
 } catch (e) {
-	e.printStackTrace ()
+	e.printStackTrace()
 	throw e
 }
-

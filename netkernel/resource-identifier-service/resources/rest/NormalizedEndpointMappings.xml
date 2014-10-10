@@ -6,6 +6,8 @@
                 <identifier>active:idsvcNormalized/get-id</identifier>
                 <argument name="id"/>
                 <argument name="content-type"/>
+                <argument name="config"/>
+                <argument name="credentials"/>
             </active>
         </grammar>
         <request>
@@ -13,6 +15,8 @@
             <argument name="operator">res:/resources/endpoints/get-id-NORMALIZED.gy</argument>
             <argument name="id">arg:id</argument>
             <argument name="content-type">arg:content-type</argument>
+			<argument name="config">arg:config</argument>
+			<argument name="credentials">arg:credentials</argument>
         </request>
     </endpoint>
 

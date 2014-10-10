@@ -6,6 +6,8 @@
 	xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
 
 	<xsl:param name="url"/>
+	<xsl:param name="config"/>
+	<xsl:param name="credentials"/>
 
 	<xsl:variable name="url-root" select="replace ($url, 'http://([-a-zA-Z0-9]+)(:[0-9]+)', '')"/>
 
@@ -45,7 +47,9 @@
 					<xrl:identifier>active:idsvcNormalized/get-id</xrl:identifier>
 					<xrl:argument name="id"><xsl:value-of select="."/></xrl:argument>
                     <xrl:argument name="content-type"><literal type="string">application/xml</literal></xrl:argument>
-					<xrl:async>false</xrl:async>
+                    <xrl:argument name="config"><xsl:value-of select="$config"/></xrl:argument>
+                    <xrl:argument name="credentials"><xsl:value-of select="$credentials"/></xrl:argument>
+					<xrl:async>true</xrl:async>
 				</xrl:include>
 			</atom:content>
 		</atom:entry>
