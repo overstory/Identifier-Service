@@ -48,7 +48,7 @@ class CompletedListener implements INKFAsyncRequestListener
 		INKFResponse response
 
 		if (accept.equals ("application/json")) {
-			req = context.createRequest ("active:JSONFromXML")
+			INKFRequest req = context.createRequest ("active:JSONFromXML")
 			req.addArgumentByValue ("operand", hcrr.getEntity())
 
 			response = context.createResponseFrom (context.issueRequest (req))
