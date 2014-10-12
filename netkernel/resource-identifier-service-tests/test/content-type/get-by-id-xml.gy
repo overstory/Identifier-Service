@@ -1,0 +1,142 @@
+import org.netkernel.layer0.nkf.INKFRequestContext
+
+import javax.xml.namespace.NamespaceContext
+
+import static com.jayway.restassured.RestAssured.*
+import com.jayway.restassured.config.RestAssuredConfig
+import static org.hamcrest.Matchers.*
+
+INKFRequestContext context = context
+
+assert (context.source ("active:ml-test-rig/clear-db"))
+
+context.sink ("active:RESTAssured/config", context.source ("res:/test/idsvc/ra-config.xml"))
+context.sink ("active:RESTAssured/xml-config", context.source ("res:/test/idsvc/xml-config.xml"))
+
+RestAssuredConfig xmlconfig = context.source ("active:RESTAssured/xml-config", RestAssuredConfig.class)
+NamespaceContext namespaces = context.source ("active:RESTAssured/xml-config/namespaces", NamespaceContext.class)
+
+def random = Math.round (Math.random())
+def templateRoot = "random:${random}:"
+def idRoot = "urn:overstory.co.uk:id:"
+
+def annotation ="""
+<i:annotation xmlns:i="http://ns.overstory.co.uk/namespaces/resources/meta/id">
+   <foo:my-stuff xmlns:foo="the-foo-namespace">
+   	<foo:label>This is the label</foo:label>
+   </foo:my-stuff>
+</i:annotation>
+"""
+
+// Create an ID with an annotation
+given()
+	.config (xmlconfig)
+	.queryParam ("template", "${templateRoot}{min:1}".toString ())
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.body (annotation)
+.when()
+	.post ("/identifier")
+.then()
+	.log().ifStatusCodeMatches (not(201))
+	.statusCode (201)
+	.body (equalTo (""))
+	.header ("Location", not (empty ()))
+	.header ("Location", containsString ("/identifier/id/${idRoot}${templateRoot}"))
+	.header ("X-URI", not (empty ()))
+	.header ("X-URI", startsWith ("${idRoot}${templateRoot}"))
+	.header ("ETag", not (empty()))
+
+assert (context.source ("active:ml-test-rig/identifier-count", Integer.class) == 1)
+
+def String uri = "${idRoot}${templateRoot}0"
+
+// Fetch the id with default Accept, should be XML
+given()
+	.config (xmlconfig)
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.header ("ETag", not (empty()))
+
+// Fetch the id with explicit wildcard Accept, should be XML
+given()
+	.config (xmlconfig)
+	.header ("Accept", "*/*")
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.header ("ETag", not (empty()))
+
+// Fetch the id with application/xml Accept, should return application/vnd.overstory.meta.id+xml
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/xml")
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.header ("ETag", not (empty()))
+
+// Fetch the id with application/vnd.overstory.meta.id+xml Accept, should be XML
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/vnd.overstory.meta.id+xml")
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+xml")
+	.header ("ETag", not (empty()))
+
+// Fetch the id with bogus Accept, should be return 406 Not Acceptable
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/vnd.overstory.foo.xxx.yyy+xml")
+.when()
+	.get ("/identifier/id/${uri}")
+.then()
+	.log().ifStatusCodeMatches (not(406))
+	.statusCode (406)
+	.contentType ("application/vnd.overstory.error+xml")
+	.body (not (empty()))
+	.body (hasXPath ("/e:errors/e:unsupported-content-type/e:uri", namespaces, equalTo (uri)))
+	.body (hasXPath ("/e:errors/e:unsupported-content-type/e:requested-content-type", namespaces, equalTo ("application/vnd.overstory.foo.xxx.yyy+xml")))
+
+
+// Fetch the id with application/json Accept, should return application/vnd.overstory.meta.id+json
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/json")
+	.when()
+	.get ("/identifier/id/${uri}")
+	.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+json")
+	.header ("ETag", not (empty()))
+
+// Fetch the id with application/vnd.overstory.meta.id+json Accept, should return application/vnd.overstory.meta.id+json
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/vnd.overstory.meta.id+json")
+	.when()
+	.get ("/identifier/id/${uri}")
+	.then()
+	.log().ifStatusCodeMatches (not(200))
+	.statusCode (200)
+	.contentType ("application/vnd.overstory.meta.id+json")
+	.header ("ETag", not (empty()))
+
+
+
+context.createResponseFrom (true)
+

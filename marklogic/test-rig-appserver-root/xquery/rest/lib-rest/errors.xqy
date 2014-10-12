@@ -4,7 +4,7 @@ module namespace emodule = "urn:overstory:rest:modules:rest:errors";
 
 import module namespace rc="urn:overstory:rest:modules:constants" at "constants.xqy";
 
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 
 declare private variable $http-codes :=
 	(: source: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html :)

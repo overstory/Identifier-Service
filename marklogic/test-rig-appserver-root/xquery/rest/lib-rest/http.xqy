@@ -4,7 +4,7 @@ module namespace httpmodule = "urn:overstory:rest:modules:rest:http";
 
 import module namespace re="urn:overstory:rest:modules:rest:errors" at "errors.xqy";
 
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 
 declare function http-date (
 	$date as xs:dateTime

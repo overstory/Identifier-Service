@@ -14,4 +14,12 @@
 		<uri>res:/test/template-tests/testlist.xml</uri>
 		<icon>res:/resources/doc/overstory-icon.png</icon>
 	</test>
+
+	<test>
+		<id>urn:test:uk:co:overstory:identifier:content-type</id>
+		<name>Content Type Tests</name>
+		<desc>Tests of identifier query content types</desc>
+		<uri>res:/test/content-type/testlist.xml</uri>
+		<icon>res:/resources/doc/overstory-icon.png</icon>
+	</test>
 </tests>

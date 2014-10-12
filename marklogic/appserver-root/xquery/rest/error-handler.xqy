@@ -3,7 +3,7 @@ xquery version "1.0-ml";
 import module namespace re="urn:overstory:rest:modules:rest:errors" at "lib-rest/errors.xqy";
 import module namespace rc="urn:overstory:rest:modules:constants" at "lib-rest/constants.xqy";
 
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 
 declare variable $error:errors as node()* external;
 

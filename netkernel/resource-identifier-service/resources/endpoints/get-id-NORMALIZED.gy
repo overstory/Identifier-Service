@@ -8,9 +8,27 @@ import org.netkernel.layer0.nkf.NKFException
 
 INKFRequestContext context = context
 
+class Constants {
+	public static final String xmlErrorType = "application/vnd.overstory.error+xml"
+	public static final String jsonErrorType = "application/vnd.overstory.error+json"
+
+	public static final String jsonResponseType = "application/vnd.overstory.meta.id+json"
+	public static final String xmlResponseType = "application/vnd.overstory.meta.id+xml"
+
+	public static final List jsonTypes = ["application/json", jsonResponseType]
+	public static final List xmlTypes = ["application/xml", xmlResponseType]
+	public static final List validTypes = [ "*/*"]
+
+	static { validTypes.addAll (jsonTypes); validTypes.addAll (xmlTypes) }
+}
+
 try {
 	String accept = context.source ("arg:content-type")
 	String id = context.getThisRequest().getArgumentValue ("id")
+
+	if ( ! Constants.validTypes.contains (accept)) {
+		return notAcceptable (context, accept, id)
+	}
 
 	req = context.createRequest ('active:httpAsync')
 	req.addArgumentByValue ("method", 'GET')
@@ -26,6 +44,22 @@ try {
 } catch (e) {
 	e.printStackTrace ()
 	throw e
+}
+
+def notAcceptable (INKFRequestContext context, String accept, String uri)
+{
+	def errorResponse =
+"""<e:errors xmlns:e="http://ns.overstory.co.uk/namespaces/resources/error">
+	<e:unsupported-content-type>
+		<e:message>Cannot produce content type '${accept}'</e:message>
+		<e:requested-content-type>${accept}</e:requested-content-type>
+		<e:uri>${uri}</e:uri>
+	</e:unsupported-content-type>
+</e:errors>
+"""
+	INKFResponse response = context.createResponseFrom (errorResponse)
+	response.setMimeType ("application/vnd.overstory.error+xml")
+	response.setHeader ("httpResponse:/code", 406)
 }
 
 class CompletedListener implements INKFAsyncRequestListener
@@ -45,20 +79,47 @@ class CompletedListener implements INKFAsyncRequestListener
 	def void receiveResponse (INKFResponseReadOnly resp, INKFRequestContext context)
 	{
 		HttpClientResponseRepresentation hcrr = resp.getRepresentation () as HttpClientResponseRepresentation
+
+		if (hcrr.getResponseCode () != 200) {
+			errorResponse (context, hcrr)
+			return
+		}
+
 		INKFResponse response
 
-		if (accept.equals ("application/json")) {
+		if (Constants.jsonTypes.contains (accept)) {
 			INKFRequest req = context.createRequest ("active:JSONFromXML")
 			req.addArgumentByValue ("operand", hcrr.getEntity())
 
 			response = context.createResponseFrom (context.issueRequest (req))
-			response.setMimeType ("application/json")
+			response.setMimeType (Constants.jsonResponseType)
 		} else {
 			response = context.createResponseFrom (hcrr.getEntity())
-			response.setMimeType (hcrr.getHeader ("content-type"))
+			response.setMimeType (Constants.xmlResponseType)
 		}
 
 		response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+		response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+		response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+	}
+
+	def void errorResponse (INKFRequestContext context, HttpClientResponseRepresentation hcrr)
+	{
+		String contentType = hcrr.getHeader ("Content-Type")
+		INKFResponse response
+
+		if ((Constants.xmlErrorType.equals (contentType)) && Constants.jsonTypes.contains (accept)) {
+			INKFRequest req = context.createRequest ("active:JSONFromXML")
+			req.addArgumentByValue ("operand", hcrr.getEntity())
+
+			response = context.createResponseFrom (context.issueRequest (req))
+			response.setMimeType (Constants.jsonErrorType)
+		} else {
+			response = context.createResponseFrom (hcrr.getEntity())
+			response.setMimeType (contentType)
+		}
+
+		response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
 		response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
 		response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
 	}

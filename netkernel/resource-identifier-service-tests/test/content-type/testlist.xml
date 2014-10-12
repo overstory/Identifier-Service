@@ -1,0 +1,10 @@
+<testlist>
+	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
+
+	<test name="GET of identifier resource by ID as XML">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/content-type/get-by-id-xml.gy</argument>
+		</request>
+	</test>
+</testlist>

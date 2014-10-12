@@ -20,9 +20,25 @@ given()
 .when()
 	.get ("/identifier/id/something-very-unlikely-to-exist")
 .then()
+	.log().ifStatusCodeMatches (not(404))
 	.statusCode (404)
+	.contentType ("application/vnd.overstory.error+xml")
 	.body (not (empty()))
 	.body (hasXPath ("/e:errors/e:resource-not-found/e:uri", namespaces, equalTo ('something-very-unlikely-to-exist')))
+;
+
+// Samr thing, but ask for JSON, check that error result type is JSON
+given()
+	.config (xmlconfig)
+	.header ("Accept", "application/vnd.overstory.meta.id+json")
+.when()
+	.get ("/identifier/id/something-very-unlikely-to-exist")
+.then()
+	.log().ifStatusCodeMatches (not(404))
+	.statusCode (404)
+	.contentType ("application/vnd.overstory.error+json")
+	.body (not (empty()))
+	.body ("'e:errors'.'e:resource-not-found'.'e:uri'", equalTo ('something-very-unlikely-to-exist'))
 ;
 
 context.createResponseFrom (true)

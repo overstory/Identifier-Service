@@ -5,7 +5,7 @@ import module namespace http="urn:overstory:modules:data-mesh:handlers:lib:http"
 import module namespace anno="urn:overstory:modules:data-mesh:handlers:lib:annotation" at "lib/annotation.xqy";
 
 declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 
 
 (:

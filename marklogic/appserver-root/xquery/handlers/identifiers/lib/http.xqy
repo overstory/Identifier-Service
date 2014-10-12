@@ -5,7 +5,7 @@ module namespace lib="urn:overstory:modules:data-mesh:handlers:lib:http";
 import module namespace const="urn:overstory:modules:data-mesh:handlers:lib:constants" at "constants.xqy";
 import module namespace re="urn:overstory:rest:modules:rest:errors" at "../../../rest/lib-rest/errors.xqy";
 
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
 
 

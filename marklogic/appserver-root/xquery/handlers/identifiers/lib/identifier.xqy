@@ -6,7 +6,7 @@ import module namespace const="urn:overstory:modules:data-mesh:handlers:lib:cons
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 import module namespace mem = "http://xqdev.com/in-mem-update" at "/MarkLogic/appservices/utils/in-mem-update.xqy";
 
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 declare namespace i = "http://ns.overstory.co.uk/namespaces/resources/meta/id";
 declare namespace m = "http://ns.overstory.co.uk/namespaces/resources/meta/content";
 

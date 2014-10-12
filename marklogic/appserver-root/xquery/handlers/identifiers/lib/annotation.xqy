@@ -5,7 +5,7 @@ module namespace anno="urn:overstory:modules:data-mesh:handlers:lib:annotation";
 import module namespace re="urn:overstory:rest:modules:rest:errors" at "../../../rest/lib-rest/errors.xqy";
 
 declare namespace i = "http://ns.overstory.co.uk/namespaces/meta/id";
-declare namespace e = "http://overstory.co.uk/ns/errors";
+declare namespace e = "http://ns.overstory.co.uk/namespaces/resources/error";
 
 
 declare function validate-annotation (

@@ -25,6 +25,10 @@
 					<xml-type>application/vnd.overstory.error+xml</xml-type>
 					<xml-type>application/vnd.overstory.meta.id+xml</xml-type>
 				</xml-content-types>
+				<json-content-types>
+					<json-content-type>application/vnd.overstory.error+json</json-content-type>
+					<json-content-type>application/vnd.overstory.meta.id+json</json-content-type>
+				</json-content-types>
 				<test-content-types>
 					<text-type>application/vnd.foobar.no.such.type+xyz</text-type>
 				</test-content-types>
@@ -36,7 +40,7 @@
 				<namespaces>
 					<namespace>
 						<prefix>e</prefix>
-						<uri>http://overstory.co.uk/ns/errors</uri>
+						<uri>http://ns.overstory.co.uk/namespaces/resources/error</uri>
 					</namespace>
 					<namespace>
 						<prefix>i</prefix>
