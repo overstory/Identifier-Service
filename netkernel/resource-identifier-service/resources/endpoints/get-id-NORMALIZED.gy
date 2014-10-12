@@ -5,6 +5,7 @@ import org.netkernel.layer0.nkf.INKFRequestContext
 import org.netkernel.layer0.nkf.INKFResponse
 import org.netkernel.layer0.nkf.INKFResponseReadOnly
 import org.netkernel.layer0.nkf.NKFException
+import org.netkernel.layer0.representation.IHDSNode
 
 INKFRequestContext context = context
 
@@ -119,9 +120,15 @@ class CompletedListener implements INKFAsyncRequestListener
 			response.setMimeType (contentType)
 		}
 
-		response.setHeader ("httpResponse:/code", hcrr.getResponseCode())
-		response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
-		response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+		response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+		List<String> dontCopyHeaders = ["content-length", "server", "connection", "keep-alive"]
+
+		hcrr.getImplementingHDS ().getNodes ("//httpHeaders/*").each { IHDSNode node ->
+			String name = node.getName ()
+			if ( ! dontCopyHeaders.contains (name.toLowerCase())) {
+				response.setHeader ("httpResponse:/header/${name}".toString(), node.getValue())
+			}
+		}
 	}
 }
 

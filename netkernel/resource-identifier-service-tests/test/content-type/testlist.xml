@@ -1,10 +1,17 @@
 <testlist>
 	<import>res:/org/netkernel/xml/assert/assertLibrary.xml</import>
 
-	<test name="GET of identifier resource by ID as XML">
+	<test name="GET of identifier resource by ID">
 		<request>
 			<identifier>active:RESTAssured</identifier>
-			<argument name="operator">res:/test/content-type/get-by-id-xml.gy</argument>
+			<argument name="operator">res:/test/content-type/get-by-id-types.gy</argument>
+		</request>
+	</test>
+
+	<test name="Search of Identifiers">
+		<request>
+			<identifier>active:RESTAssured</identifier>
+			<argument name="operator">res:/test/content-type/search-types.gy</argument>
 		</request>
 	</test>
 </testlist>

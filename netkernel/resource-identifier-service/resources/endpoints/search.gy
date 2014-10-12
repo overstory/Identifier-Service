@@ -6,6 +6,21 @@ import org.netkernel.layer0.representation.IHDSNode
 
 INKFRequestContext context = context
 
+class Constants {
+	public static final String xmlErrorType = "application/vnd.overstory.error+xml"
+	public static final String jsonErrorType = "application/vnd.overstory.error+json"
+
+	public static final String jsonResponseType = "application/atom+json"
+	public static final String xmlResponseType = "application/atom+xml"
+
+	public static final List jsonTypes = ["application/json", jsonResponseType]
+	public static final List xmlTypes = ["application/xml", xmlResponseType]
+	public static final List validTypes = [ "*/*"]
+
+	static { validTypes.addAll (jsonTypes); validTypes.addAll (xmlTypes) }
+}
+
+
 try {
 	String accept = context.source ("httpRequest:/accept/preferred")
 	String url = context.source ("arg:url")
@@ -57,48 +72,69 @@ class CompletedListener implements INKFAsyncRequestListener
 	{
 		HttpClientResponseRepresentation hcrr = resp.getRepresentation () as HttpClientResponseRepresentation
 
-		if (hcrr.getResponseCode () == 200) {
-			INKFRequest req = context.createRequest ("active:xslt2")
-			req.addArgumentByValue ("operand", hcrr.getEntity ())
-			req.addArgument ("operator", "res:/resources/xslt/search-to-atom-xrl.xsl")
-			req.addArgumentByValue ("url", url)
-			req.addArgumentByValue ("queryString", queryString)
-			req.addArgumentByValue ("config", config)
-			req.addArgumentByValue ("credentials", credentials)
-			def rep = context.issueRequest (req)
+		if (hcrr.getResponseCode () != 200) {
+			errorResponse (context, hcrr)
+			return
+		}
 
-			req = context.createRequest ("active:xrl2")
-			req.addArgumentByValue ("template", rep)
+		INKFRequest req = context.createRequest ("active:xslt2")
+		req.addArgumentByValue ("operand", hcrr.getEntity ())
+		req.addArgument ("operator", "res:/resources/xslt/search-to-atom-xrl.xsl")
+		req.addArgumentByValue ("url", url)
+		req.addArgumentByValue ("queryString", queryString)
+		req.addArgumentByValue ("config", config)
+		req.addArgumentByValue ("credentials", credentials)
+		def rep = context.issueRequest (req)
+
+		req = context.createRequest ("active:xrl2")
+		req.addArgumentByValue ("template", rep)
+		rep = context.issueRequest (req)
+
+		INKFResponse response
+
+		if (Constants.jsonTypes.contains (accept)) {
+			req = context.createRequest ("active:JSONFromXML")
+			req.addArgumentByValue ("operand", rep)
 			rep = context.issueRequest (req)
 
-			INKFResponse response
-
-			if (accept.equals ("application/json")) {
-				req = context.createRequest ("active:JSONFromXML")
-				req.addArgumentByValue ("operand", rep)
-				rep = context.issueRequest (req)
-
-				response = context.createResponseFrom (rep)
-				response.setMimeType ("application/json")
-			} else {
-				response = context.createResponseFrom (rep)
-				response.setMimeType (hcrr.getHeader ("content-type"))
-			}
-
-			response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
-			response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
-			response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+			response = context.createResponseFrom (rep)
+			response.setMimeType (Constants.jsonResponseType)
+			response.setHeader ("httpResponse:/header/Content-Type", Constants.jsonResponseType)
 		} else {
-			List<String> dontCopyHeaders = ["content-length", "server", "connection", "keep-alive"]
-			INKFResponse response = context.createResponseFrom (hcrr.getEntity ())
-			response.setMimeType (hcrr.getHeader ("content-type"))
-			response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+			response = context.createResponseFrom (rep)
+			response.setMimeType (Constants.xmlResponseType)
+			response.setHeader ("httpResponse:/header/Content-Type", Constants.xmlResponseType)
+		}
 
-			hcrr.getImplementingHDS ().getNodes ("//httpHeaders/*").each { IHDSNode node ->
-				String name = node.getName ()
-				if (!dontCopyHeaders.contains (name.toLowerCase ())) {
-					response.setHeader ("httpResponse:/header/${name}".toString (), node.getValue ())
-				}
+		response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+		response.setHeader ("httpResponse:/header/ETag", hcrr.getHeader ("etag"))
+		response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
+	}
+
+	// FixMe: This should be factored into a generic resource to transform the response, share with get-id-NORMALIZED.gy
+	def void errorResponse (INKFRequestContext context, HttpClientResponseRepresentation hcrr)
+	{
+		String contentType = hcrr.getHeader ("Content-Type")
+		INKFResponse response
+
+		if ((Constants.xmlErrorType.equals (contentType)) && Constants.jsonTypes.contains (accept)) {
+			INKFRequest req = context.createRequest ("active:JSONFromXML")
+			req.addArgumentByValue ("operand", hcrr.getEntity())
+
+			response = context.createResponseFrom (context.issueRequest (req))
+			response.setMimeType (Constants.jsonErrorType)
+		} else {
+			response = context.createResponseFrom (hcrr.getEntity())
+			response.setMimeType (contentType)
+		}
+
+		response.setHeader ("httpResponse:/code", hcrr.getResponseCode ())
+		List<String> dontCopyHeaders = ["content-length", "server", "connection", "keep-alive"]
+
+		hcrr.getImplementingHDS ().getNodes ("//httpHeaders/*").each { IHDSNode node ->
+			String name = node.getName ()
+			if ( ! dontCopyHeaders.contains (name.toLowerCase())) {
+				response.setHeader ("httpResponse:/header/${name}".toString(), node.getValue())
 			}
 		}
 	}
