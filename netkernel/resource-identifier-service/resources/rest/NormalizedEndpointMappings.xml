@@ -12,7 +12,7 @@
         </grammar>
         <request>
             <identifier>active:groovy</identifier>
-            <argument name="operator">res:/resources/endpoints/get-id-NORMALIZED.gy</argument>
+            <argument name="operator">res:/resources/endpoints/get-id-norm.gy</argument>
             <argument name="id">arg:id</argument>
             <argument name="content-type">arg:content-type</argument>
 			<argument name="config">arg:config</argument>

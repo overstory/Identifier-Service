@@ -111,7 +111,7 @@ class CompletedListener implements INKFAsyncRequestListener
 		response.setHeader ("httpResponse:/header/Last-Modified", hcrr.getHeader ("last-modified"))
 	}
 
-	// FixMe: This should be factored into a generic resource to transform the response, share with get-id-NORMALIZED.gy
+	// FixMe: This should be factored into a generic resource to transform the response, share with get-id-norm.gy
 	def void errorResponse (INKFRequestContext context, HttpClientResponseRepresentation hcrr)
 	{
 		String contentType = hcrr.getHeader ("Content-Type")
